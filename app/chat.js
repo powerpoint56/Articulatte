@@ -35,6 +35,7 @@ const Message = {
 const socket = new WebSocket((location.protocol === "https:" ? "wss" : "ws") + "://" + window.location.host);
 
 socket.onopen = e => {
+  console.log("open");
   if (window.localStorage.getItem("nickname")) {
     login(window.localStorage.getItem("nickname"));
   } else {
@@ -62,7 +63,7 @@ socket.onmessage = e => {
 };
 
 socket.onerror = function(e) {
-  // e.type
+  alert(`Error ${e.type}`);
 };
 
 socket.onclose = e => {

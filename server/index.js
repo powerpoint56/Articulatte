@@ -3,7 +3,7 @@
 const ws = require("ws");
 const http = require("http");
 const nodeStatic = require("node-static");
-const shortid = require("shortid");
+//const shortid = require("shortid");
 const animalia = require("./animalia.js");
 
 let file = new nodeStatic.Server("./app");
@@ -61,7 +61,7 @@ Room.all = () => {
 const Home = Room.create("Home");
 Home.permanent = true;
 
-let wss = new ws.Server({server: server});
+let wss = new ws.Server({server, keepAlive: true});
 
 wss.broadcast = data =>
     wss.clients.forEach(client => client.send(data));
