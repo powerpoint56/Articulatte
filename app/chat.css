@@ -1,0 +1,136 @@
+body, html, .main {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "PT Sans", sans-serif;
+  font-size: 15px;
+}
+
+textarea {
+  padding: 4px;
+  font-size: 100%;
+  font-family: inherit;
+  border: 0;
+}
+
+button {
+  color: #828282;
+  background: none;
+  border-radius: 0;
+  border: 0;
+  outline: 0;
+  margin: 0 4px;
+  cursor: pointer;
+  font-size: 80%;
+  padding: 4px;
+}
+
+button:hover, button:active {
+  background: #f6f6f8;
+}
+
+header {
+  background: #e6e6e8;
+  padding: 8px;
+  cursor: default;
+  font-size: 18px;
+  display: flex;
+  justify-content: space-between;
+}
+
+input {
+  font-size: 100%;
+  font-family: inherit;
+  padding: 4px;
+}
+
+.main {
+  flex-flow: row;
+  flex: 1 0;
+  display: flex;
+}
+
+.window {
+  display: flex;
+  flex-flow: column;
+  flex: 1;
+  border-right: 1px solid #ccc;
+}
+
+.feed {
+  flex: 1;
+  background: #fff;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.field {
+  background: #e6e6e8;
+  padding: 8px;
+  display: flex;
+}
+
+.f-input {
+  flex: 1 0;
+}
+
+.f-reply {
+  vertical-align: center;
+}
+
+.message {
+  padding: 4px;
+  font-size: 100%;
+  margin: 0 4px 4px 4px;
+  display: flex;
+}
+
+.m-icon {
+  background: url("default.jpg");
+  width: 48px;
+  height: 48px;
+  border: 1px solid black;
+}
+
+.m-content {
+  margin-left: 6px;
+}
+
+.m-header {
+  line-height: 1.3em;
+}
+
+.m-time {
+  font-size: 13px;
+  color: #929294;
+  margin-left: 6px;
+}
+
+.m-text {
+
+}
+
+.update {
+  color: #929294;
+  margin: 0 4px 4px 4px;
+}
+
+.people {
+  flex: 0 15em;
+  background: #f3f3f5;
+  padding: 8px;
+  order: 100;
+}
+
+.nickname {
+  order: -100;
+  padding: 8px;
+  font-size: 18px;
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .main {
+    flex-flow: column;
+  }
+}
