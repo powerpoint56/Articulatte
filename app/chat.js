@@ -102,7 +102,7 @@ messages.join = (roomId, ...arr) => {
     members.push(arr[i+1]);
   }
 
-  let update = "joined room";
+  let update = "joined room " + rooms[roomId].name;
   if (members.length) {
     update += " with " + members.join(", ");
   }
