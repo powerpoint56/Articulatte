@@ -1,6 +1,5 @@
 "use strict";
 
-const ws = require("ws");
 const http = require("http");
 const nodeStatic = require("node-static");
 //const shortid = require("shortid");
@@ -14,10 +13,7 @@ let server = http.createServer((req, res) => {
     }).resume();
 }).listen(process.env.PORT || 3000);
 
-const Message = {
-  compress: (eventName, ...args) => JSON.stringify([eventName, ...args]).slice(1, -1),
-  open: message => JSON.parse(`[${message}]`)
-};
+const io = require("socket.io")(server);
 
 const users = {};
 class User {
@@ -61,66 +57,52 @@ Room.all = () => {
 const Home = Room.create("Home");
 Home.permanent = true;
 
-let wss = new ws.Server({server, perMessageDeflate: false});
-
-wss.broadcast = data =>
-    wss.clients.forEach(client => client.send(data));
-
-wss.on("connection", ws => {
+io.on("connection", socket => {
   const user = User.create();
-  user.socket = ws;
+  user.socket = socket;
 
-  ws.send(Message.compress("rooms", ...Room.all()));
+  socket.emit("rooms", Room.all());
 
   function joinRoom(room) {
     if (!room || user.roomIds.has(room.id)) return;
 
-    const greeting = Message.compress("+member", room.id, user.id, user.nickname);
-    let reply = ["join", room.id];
+    let reply = [];
 
     room.memberIds.forEach(id => {
       reply.push(id);
       reply.push(users[id].nickname);
 
-      users[id].socket.send(greeting);
+      users[id].socket.emit("+member", room.id, user.id, user.nickname);
     });
 
-    ws.send(Message.compress(...reply));
+    socket.emit("join", room.id, reply);
 
     room.memberIds.add(user.id);
     user.roomIds.add(room.id);
   }
 
-  const messages = {};
-
-  messages.login = nickname => {
+  socket.on("login", nickname => {
     user.nickname = nickname.trim().substr(0, 20) || `anonymous ${animalia.random()}`; // mult' animalia!!
-    ws.send(Message.compress("login", user.id, user.nickname));
+    socket.emit("login", user.id, user.nickname);
 
     joinRoom(Home);
-  };
+  });
 
-  messages.tell = (roomId, content) => {
+  socket.on("tell", (roomId, content) => {
     content = content.trim().substr(0, 1000);
     rooms[roomId].memberIds.forEach(id => {
       if (id !== user.id) {
-        users[id].socket.send(Message.compress("tell", roomId, content, user.id));
+        users[id].socket.emit("tell", roomId, content, user.id);
       }
     });
-  };
-
-  messages.leave = roomId => {
-    leaveRoom(rooms[roomId]);
-    ws.send(Message.compress("left", roomId));
-  };
-
-  ws.on("message", data => {
-    data = Message.open(data);
-    messages[data[0]](...data.splice(1));
   });
 
-  ws.on("close", e => {
-    console.log(e);
+  socket.on("leave", roomId => {
+    leaveRoom(rooms[roomId]);
+    socket.emit("left", roomId);
+  });
+
+  socket.on("close", () => {
     user.roomIds.forEach(id => {
       leaveRoom(rooms[id]);
     });
@@ -134,9 +116,8 @@ wss.on("connection", ws => {
     room.memberIds.delete(user.id);
     user.roomIds.delete(room.id);
 
-    let message = Message.compress("-member", room.id, user.id);
     room.memberIds.forEach(id => {
-      users[id].socket.send(message);
+      users[id].socket.emit("-member", room.id, user.id);
     });
 
     if (!room.permanent && !room.memberIds.size) {
@@ -145,7 +126,7 @@ wss.on("connection", ws => {
   }
 
   function deleteRoom(room) {
-    wss.broadcast(Message.compress("-room", room.id));
+    sockets.broadcast(Message.compress("-room", room.id));
     delete rooms[room.id];
   }
 });

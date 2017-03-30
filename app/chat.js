@@ -26,56 +26,34 @@ User.create = (...args) => {
 let myId;
 
 
-const Message = {
-  compress: (eventName, ...args) => JSON.stringify([eventName, ...args]).slice(1, -1),
-  open: message => JSON.parse(`[${message}]`)
-};
+const socket = io();
 
-const socket = new WebSocket(location.origin.replace(/^http/, 'ws'));
+if (window.localStorage.getItem("nickname")) {
+  login(window.localStorage.getItem("nickname"));
+} else {
+  jd.c("form", {class: "nickname"}, [
+    jd.c("label", "Enter a nickname: ", [
+      jd.c("input", {placeholder: "anonymous"})
+    ])
+  ], jd.f(".main")).addEventListener("submit", e => {
+    e.preventDefault();
 
-socket.onopen = e => {
-  if (window.localStorage.getItem("nickname")) {
-    login(window.localStorage.getItem("nickname"));
-  } else {
-    jd.c("form", {class: "nickname"}, [
-      jd.c("label", "Enter a nickname: ", [
-        jd.c("input", {placeholder: "anonymous"})
-      ])
-    ], jd.f(".main")).addEventListener("submit", e => {
-      e.preventDefault();
+    let nickname = jd.f("input", e.target).value;
 
-      let nickname = jd.f("input", e.target).value;
+    jd.f(".main").removeChild(e.target);
 
-      jd.f(".main").removeChild(e.target);
+    login(nickname);
 
-      login(nickname);
+    return false;
+  });
+}
 
-      return false;
-    });
-  }
-};
-
-socket.onmessage = e => {
-  var data = Message.open(e.data);
-  messages[data[0]](...data.splice(1));
-};
-
-socket.onerror = function(e) {
-  alert(`Error ${e.type}`);
-};
-
-socket.onclose = e => {
-  alert(`Connection to server closed. Code ${e.code}; Reason: ${e.reason}; ${e.wasClean ? "Clean" : "Not Clean"}`);
-};
-
-const messages = {};
-
-messages.login = (id, nickname) => {
+socket.on("login", (id, nickname) => {
   myId = id;
   User.create(id, nickname);
 
   window.localStorage.setItem("nickname", nickname);
-  jd.c("div", {class: ".message"}, [
+  jd.c("div", {class: "message"}, [
     users[myId].createIcon(),
     jd.c("div", {class: "m-content"}, [
       jd.c("div", {class: "m-header"}, [
@@ -83,15 +61,15 @@ messages.login = (id, nickname) => {
       ])
     ])
   ], jd.f(".people"));
-};
+});
 
-messages.rooms = (...arr) => {
+socket.on("rooms", (arr) => {
   for (let i = 0; i < arr.length; ++i) {
     Room.create(arr[i], arr[++i]);
   }
-};
+});
 
-messages.join = (roomId, ...arr) => {
+socket.on("join", (roomId, arr) => {
   rooms[roomId].setUpWindow();
 
   let members = [];
@@ -105,32 +83,32 @@ messages.join = (roomId, ...arr) => {
     update += " with " + members.join(", ");
   }
   rooms[roomId].addUpdate(update, users[myId]);
-};
+});
 
-messages.tell = (roomId, content, userId) => {
+socket.on("tell", (roomId, content, userId) => {
   rooms[roomId].addMessage(content, users[userId]);
-};
+});
 
-messages["-room"] = id => {
+socket.on("-room", id => {
   delete rooms[id];
-};
+});
 
-messages["+member"] = (roomId, userId, nickname) => {
+socket.on("+member", (roomId, userId, nickname) => {
   User.create(userId, nickname);
   rooms[roomId].addUpdate(`${nickname} has joined the room`, users[userId]);
-};
+});
 
-messages["-member"] = (roomId, userId) => {
+socket.on("-member", (roomId, userId) => {
   rooms[roomId].addUpdate(`${users[userId].nickname} has left the room`, users[userId]);
-};
+});
 
-messages.left = roomId => {
+socket.on("left", roomId => {
   rooms[roomId].leave();
-}
+});
 
 
 function login(nickname) {
-  socket.send(Message.compress("login", nickname));
+  socket.emit("login", nickname);
 }
 
 const date = new Date();
@@ -168,7 +146,7 @@ class Room {
       if (Date.now() - lastMessage < 100 || !message.length)  return;
       lastMessage = Date.now();
 
-      socket.send(Message.compress("tell", this.id, message));
+      socket.emit("tell", this.id, message);
       this.input.value = "";
       this.addMessage(message, users[myId]);
 
@@ -178,7 +156,7 @@ class Room {
     this.feed = jd.f(".feed", this.el);
 
     jd.f("button", jd.f("header", this.el)).addEventListener("click", e => {
-      socket.send(Message.compress("leave", this.id));
+      socket.emit("leave", this.id);
     });
   }
   leave() {
