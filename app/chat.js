@@ -21,7 +21,6 @@ class User {
 User.create = (...args) => {
   const user = new User(...args);
   users[user.id] = user;
-  console.log(users);
   return user;
 }
 let myId;
@@ -32,10 +31,9 @@ const Message = {
   open: message => JSON.parse(`[${message}]`)
 };
 
-const socket = new WebSocket((location.protocol === "https:" ? "wss" : "ws") + "://" + window.location.host);
+const socket = new WebSocket(location.origin.replace(/^http/, 'ws'));
 
 socket.onopen = e => {
-  console.log("open");
   if (window.localStorage.getItem("nickname")) {
     login(window.localStorage.getItem("nickname"));
   } else {
@@ -91,7 +89,6 @@ messages.rooms = (...arr) => {
   for (let i = 0; i < arr.length; ++i) {
     Room.create(arr[i], arr[++i]);
   }
-  console.log(rooms);
 };
 
 messages.join = (roomId, ...arr) => {
@@ -233,13 +230,12 @@ const Notify = (() => {
       tabActive = false;
   });
 
-  const context = new (window.AudioContext || window.webkitAudioContext)();
+  window.AudioContext = window.AudioContext || window.webkitAudioContext;
+  const context = AudioContext ? new AudioContext() : null;
 
   return {
     beep: () => {
-      if (tabActive) return;
-
-      console.log(context);
+      if (tabActive || !context) return;
 
       const osc = context.createOscillator();
       const gain = context.createGain();

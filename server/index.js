@@ -12,7 +12,7 @@ let server = http.createServer((req, res) => {
     req.addListener("end", () => {
         file.serve(req, res);
     }).resume();
-}).listen(process.env.PORT || 8888);
+}).listen(process.env.PORT || 3000);
 
 const Message = {
   compress: (eventName, ...args) => JSON.stringify([eventName, ...args]).slice(1, -1),
@@ -61,7 +61,7 @@ Room.all = () => {
 const Home = Room.create("Home");
 Home.permanent = true;
 
-let wss = new ws.Server({server, keepAlive: true});
+let wss = new ws.Server({server, perMessageDeflate: false});
 
 wss.broadcast = data =>
     wss.clients.forEach(client => client.send(data));
