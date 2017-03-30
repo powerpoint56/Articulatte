@@ -35,7 +35,6 @@ const Message = {
 const socket = new WebSocket((location.protocol === "https:" ? "wss" : "ws") + "://" + window.location.host);
 
 socket.onopen = e => {
-  console.log("test");
   if (window.localStorage.getItem("nickname")) {
     login(window.localStorage.getItem("nickname"));
   } else {

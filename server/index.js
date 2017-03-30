@@ -119,7 +119,8 @@ wss.on("connection", ws => {
     messages[data[0]](...data.splice(1));
   });
 
-  ws.on("close", () => {
+  ws.on("close", e => {
+    console.log(e);
     user.roomIds.forEach(id => {
       leaveRoom(rooms[id]);
     });
@@ -146,18 +147,5 @@ wss.on("connection", ws => {
   function deleteRoom(room) {
     wss.broadcast(Message.compress("-room", room.id));
     delete rooms[room.id];
-  }
-});
-
-process.stdin.resume();
-process.stdin.setEncoding("utf8");
-
-process.stdin.on("data", text => {
-  if (text.startsWith("quit")) {
-    process.exit();
-  } else if (text.startsWith("rooms")) {
-    console.log(rooms);
-  } else if (text.startsWith("users")) {
-    console.log(users);
   }
 });
