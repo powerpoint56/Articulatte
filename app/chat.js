@@ -32,7 +32,7 @@ const Message = {
   open: message => JSON.parse(`[${message}]`)
 };
 
-const socket = new WebSocket("ws://localhost:3000");
+const socket = new WebSocket((location.protocol === "https:" ? "wss" : "ws") + "://" + window.location.host);
 
 socket.onopen = e => {
   if (window.localStorage.getItem("nickname")) {
