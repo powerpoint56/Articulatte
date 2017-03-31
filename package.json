@@ -1,7 +1,7 @@
 {
   "name": "talk",
   "version": "1.0.0",
-  "description": "chat web app using WebSockets",
+  "description": "chat web app using socket.io",
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js"
@@ -9,6 +9,7 @@
   "author": "pointprojects",
   "license": "ISC",
   "dependencies": {
+    "bufferutil": "^3.0.0",
     "node-static": "^0.7.9",
     "shortid": "^2.2.6",
     "socket.io": "^1.7.3"
