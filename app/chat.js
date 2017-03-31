@@ -28,12 +28,15 @@ let myId;
 
 const socket = io();
 
+// "nick taken"
+
 if (window.localStorage.getItem("nickname")) {
   login(window.localStorage.getItem("nickname"));
 } else {
   jd.c("form", {class: "nickname"}, [
     jd.c("label", "Enter a nickname: ", [
-      jd.c("input", {placeholder: "anonymous"})
+      jd.c("input", {placeholder: "anonymous"}),
+      jd.c("button", {class: "f-submit fa fa-reply"})
     ])
   ], jd.f(".main")).addEventListener("submit", e => {
     e.preventDefault();

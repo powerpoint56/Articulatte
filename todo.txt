@@ -1,2 +1,1 @@
-- two users with same username
-- automatic login (localstorage) and user info bar (logo, nickname, rooms+)
+- rooms list, making rooms

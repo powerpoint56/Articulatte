@@ -82,7 +82,14 @@ io.on("connection", socket => {
   }
 
   socket.on("login", nickname => {
-    user.nickname = nickname.trim().substr(0, 20) || `anonymous ${animalia.random()}`; // mult' animalia!!
+    nickname = nickname.trim().substr(0, 20) || `anonymous ${animalia.random()}`; // mult' animalia!!
+    for (let user in users) {
+      if (user.nickname === nickname) {
+        socket.emit("nick taken");
+        return;
+      }
+    }
+    user.nickname = nickname;
     socket.emit("login", user.id, user.nickname);
 
     joinRoom(Home);
@@ -102,7 +109,7 @@ io.on("connection", socket => {
     socket.emit("left", roomId);
   });
 
-  socket.on("close", () => {
+  socket.on("disconnect", () => {
     user.roomIds.forEach(id => {
       leaveRoom(rooms[id]);
     });
