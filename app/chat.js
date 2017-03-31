@@ -71,7 +71,7 @@ if (localStorage.getItem("nickname")) {
 }
 
 function login(nickname) {
-  console.log("emit");console.log("emit");socket.emit("login", nickname);
+  socket.emit("login", nickname);
 }
 
 socket.on("nickInvalid", (name, reason) => {
@@ -79,6 +79,7 @@ socket.on("nickInvalid", (name, reason) => {
 });
 
 socket.on("login", (id, nickname) => {
+  console.log("login");
   jd.f(".main").removeChild(jd.f(".nickname", ".main"));
 
   myId = id;
@@ -105,13 +106,14 @@ const RoomList = new UpdatingList((li, room) => {
 jd.f("form", RoomList.el).addEventListener("submit", e => {
   e.preventDefault();
 
-  console.log("emit");console.log("emit");socket.emit("+room", jd.f(`input[type="text"]`, e.target).value, jd.f(`input[type="checkbox"]`, e.target).value); // room name, is private?
+  socket.emit("+room", jd.f(`input[type="text"]`, e.target).value, jd.f(`input[type="checkbox"]`, e.target).value); // room name, is private?
 
   return false;
 });
 
 
 socket.on("join", (roomId, arr) => {
+  console.log("join");
   rooms[roomId].setUpWindow();
 
   let members = [];
@@ -182,7 +184,7 @@ class Room {
       if (Date.now() - lastMessage < 100 || !message.length)  return;
       lastMessage = Date.now();
 
-      console.log("emit");socket.emit("tell", this.id, message);
+      socket.emit("tell", this.id, message);
       this.input.value = "";
       this.addMessage(message, users[myId]);
 
@@ -192,7 +194,7 @@ class Room {
     this.feed = jd.f(".feed", this.el);
 
     jd.f("button", jd.f("header", this.el)).addEventListener("click", e => {
-      console.log("emit");socket.emit("leave", this.id);
+      socket.emit("leave", this.id);
     });
   }
   leave() {

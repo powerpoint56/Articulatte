@@ -80,6 +80,7 @@ io.on("connection", socket => {
       users[id].socket.emit("+member", room.id, user.id, user.nickname);
     });
 
+    console.log("join", user.id, user.nickname, room.name);
     socket.emit("join", room.id, reply);
 
     room.memberIds.add(user.id);
@@ -96,6 +97,7 @@ io.on("connection", socket => {
       }
     }
     user.nickname = nickname;
+    console.log("login", user.id, user.nickname);
     socket.emit("login", user.id, user.nickname);
 
     joinRoom(Home);
