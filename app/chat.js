@@ -79,7 +79,6 @@ socket.on("nickInvalid", (name, reason) => {
 });
 
 socket.on("login", (id, nickname) => {
-  console.log("login");
   jd.f(".main").removeChild(jd.f(".nickname", ".main"));
 
   myId = id;
@@ -113,7 +112,6 @@ jd.f("form", RoomList.el).addEventListener("submit", e => {
 
 
 socket.on("join", (roomId, arr) => {
-  console.log("join");
   rooms[roomId].setUpWindow();
 
   let members = [];

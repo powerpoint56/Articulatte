@@ -1,11 +1,13 @@
 "use strict";
 
-const http = require("http");
+const isProduction = process.argv[2] === "prod";
+
+const http = require(isProduction ? "https" : "http");
 const nodeStatic = require("node-static");
 //const shortid = require("shortid");
 const animalia = require("./animalia.js");
 
-let file = new nodeStatic.Server(process.argv[2] === "prod" ? "./dist" : "./app");
+let file = new nodeStatic.Server(isProduction ? "./dist" : "./app");
 
 let server = http.createServer((req, res) => {
     req.addListener("end", () => {
@@ -80,7 +82,6 @@ io.on("connection", socket => {
       users[id].socket.emit("+member", room.id, user.id, user.nickname);
     });
 
-    console.log("join", user.id, user.nickname, room.name);
     socket.emit("join", room.id, reply);
 
     room.memberIds.add(user.id);
@@ -97,7 +98,6 @@ io.on("connection", socket => {
       }
     }
     user.nickname = nickname;
-    console.log("login", user.id, user.nickname);
     socket.emit("login", user.id, user.nickname);
 
     joinRoom(Home);
