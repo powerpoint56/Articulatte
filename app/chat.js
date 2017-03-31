@@ -1,6 +1,45 @@
-{
+if (!Array.isArray) {
+  Array.isArray = function(arg) {
+    return Object.prototype.toString.call(arg) === '[object Array]';
+  };
+}
+
+(() => {
 
 "use strict";
+
+class UpdatingList {
+  constructor(buildItem, name) { // pass in name (the header); function to make new li's — passed li element and user's args
+    this.name = name;
+    this.buildItem = buildItem;
+
+    this.ul = jd.c("ul");
+    this.header = jd.c("h4", name);
+    this.el = jd.c("div", {class: "updating-list"}, [
+      this.header,
+      this.ul
+    ]);
+  }
+  init(arr, parent) {
+    for (let x of arr) {
+      this.add(x, false);
+    }
+
+    parent.appendChild(this.el);
+  }
+  add(args, updateTitle = true) {
+    this.ul.appendChild(this.buildItem(jd.c("li"), args));
+    ++this.count;
+    if (updateTitle) {
+      this.header.textContent = `${this.name} (${this.count})`;
+    }
+  }
+  remove(el) {
+    this.ul.removeChild(el);
+    --this.count;
+  }
+}
+
 
 const users = {};
 class User {
@@ -65,11 +104,24 @@ socket.on("login", (id, nickname) => {
   ], jd.f(".people"));
 });
 
+
+const RoomList = new UpdatingList("Rooms", (li, room) => {
+  li.textContent = room.name;
+  return li;
+});
+
 socket.on("rooms", (arr) => {
   for (let i = 0; i < arr.length; ++i) {
     Room.create(arr[i], arr[++i]);
   }
+  RoomList.init(arr);
 });
+
+socket.on("-room", id => {
+  delete rooms[id];
+});
+
+
 
 socket.on("join", (roomId, arr) => {
   rooms[roomId].setUpWindow();
@@ -89,10 +141,6 @@ socket.on("join", (roomId, arr) => {
 
 socket.on("tell", (roomId, content, userId) => {
   rooms[roomId].addMessage(content, users[userId]);
-});
-
-socket.on("-room", id => {
-  delete rooms[id];
 });
 
 socket.on("+member", (roomId, userId, nickname) => {
@@ -230,4 +278,4 @@ const Notify = (() => {
   };
 })();
 
-}
+})();

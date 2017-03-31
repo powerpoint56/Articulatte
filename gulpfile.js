@@ -3,6 +3,8 @@
 const gulp = require("gulp");
 const babel = require("gulp-babel");
 const uglify = require("gulp-uglify");
+const concat = require("gulp-concat");
+const htmlreplace = require("gulp-html-replace");
 
 const cssmin = require("gulp-cssmin");
 const autoprefixer = require('gulp-autoprefixer');
@@ -12,14 +14,18 @@ const src = "./app";
 const dest = "./dist";
 
 gulp.task("js", () => {
-    gulp.src(src + "/*.js")
+    gulp.src([src + "*.js"])
         .pipe(babel({presets: ["es2015"]}))
         .pipe(uglify())
+        .pipe(concat("build.js"))
         .pipe(gulp.dest(dest));
 });
 
 gulp.task("html", () => {
     gulp.src(src + "/*.html")
+        .pipe(htmlreplace({
+          js: "build.js"
+        }))
         .pipe(htmlmin({collapseWhitespace: true}))
         .pipe(gulp.dest(dest));
 });
