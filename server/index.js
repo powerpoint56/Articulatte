@@ -5,7 +5,7 @@ const nodeStatic = require("node-static");
 //const shortid = require("shortid");
 const animalia = require("./animalia.js");
 
-let file = new nodeStatic.Server("./app");
+let file = new nodeStatic.Server(process.argv[2] === "prod" ? "./dist" : "./app");
 
 let server = http.createServer((req, res) => {
     req.addListener("end", () => {

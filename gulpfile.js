@@ -12,10 +12,10 @@ const src = "./app";
 const dest = "./dist";
 
 gulp.task("js", () => {
-    gulp.src(app.js)
+    gulp.src(src + "/*.js")
         .pipe(babel({presets: ["es2015"]}))
         .pipe(uglify())
-        .pipe(gulp.dest(dist.js));
+        .pipe(gulp.dest(dest));
 });
 
 gulp.task("html", () => {
@@ -31,4 +31,9 @@ gulp.task("css", () => {
         .pipe(gulp.dest(dest));
 });
 
-gulp.task("default", ["js", "html", "css"]);
+gulp.task("etal", () => {
+    gulp.src(src + "/default.jpg")
+        .pipe(gulp.dest(dest));
+});
+
+gulp.task("default", ["js", "html", "css", "etal"]);
