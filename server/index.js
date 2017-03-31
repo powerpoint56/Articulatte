@@ -31,31 +31,36 @@ User.create = () => {
 
 
 class Room {
-  constructor(name) {
+  constructor(name, settings = {isPrivate: false, isPermanent: false}) {
     this.name = name;
     this.id = Room.id++;
+
     this.memberIds = new Set();
+
+    this.isPrivate = !!settings.isPrivate;
+    this.isPermanent = !!settings.isPermanent;
+  }
+  info() {
+    return [this.id, this.name, this.isPrivate];
   }
 }
 
 const rooms = {};
 Room.id = 0;
-Room.create = name => {
-  const room = new Room(name);
+Room.create = (...args) => {
+  const room = new Room(...args);
   rooms[room.id] = room;
   return room;
 };
 Room.all = () => {
   let data = [];
   for (let x in rooms) {
-    data.push(x);
-    data.push(rooms[x].name);
+    data = data.concat(rooms[x].info());
   }
   return data;
 };
 
-const Home = Room.create("Home");
-Home.permanent = true;
+const Home = Room.create("Home", {isPermanent: true});
 
 io.on("connection", socket => {
   const user = User.create();
@@ -128,7 +133,7 @@ io.on("connection", socket => {
       users[id].socket.emit("-member", room.id, user.id);
     });
 
-    if (!room.permanent && !room.memberIds.size) {
+    if (!room.isPermanent && !room.memberIds.size) {
       deleteRoom(room);
     }
   }
@@ -137,4 +142,17 @@ io.on("connection", socket => {
     sockets.broadcast(Message.compress("-room", room.id));
     delete rooms[room.id];
   }
+
+  socket.on("+room", (name, isPrivate) => {
+    name = name.trim().substr(0, 20);
+    for (let x in rooms) {
+      if (rooms.name === name) {
+        socket.emit("roomInvalid", name, "taken");
+        return;
+      }
+    }
+
+    const room = Room.create(name, {isPrivate});
+    io.sockets.emit("+room", ...room.info());
+  });
 });

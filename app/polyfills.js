@@ -3,3 +3,5 @@ if (!Array.isArray) {
     return Object.prototype.toString.call(arg) === '[object Array]';
   };
 }
+
+window.AudioContext = window.AudioContext || window.webkitAudioContext;

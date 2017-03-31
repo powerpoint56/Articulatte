@@ -7,26 +7,23 @@ class UpdatingList {
     this.name = name;
     this.buildItem = buildItem;
 
-    this.ul = jd.c("ul", {class: "rooms"});
-    this.header = jd.c("h4", name);
-    this.el = jd.c("div", {class: "updating-list"}, [
-      this.header,
-      this.ul
-    ]);
+    this.el = jd.f(".rooms");
+    this.ul = jd.f("ul", this.el);
+    this.header = jd.f("h4", this.el);
+
+    this.count = 0;
   }
   init(arr, parent) {
     for (let x in arr) {
-      this.add(arr[x], false);
+      this.add(arr[x]);
     }
 
     parent.appendChild(this.el);
   }
-  add(args, updateTitle = true) {
+  add(args) {
     this.ul.appendChild(this.buildItem(jd.c("li"), args));
     ++this.count;
-    if (updateTitle) {
-      this.header.textContent = `${this.name} (${this.count})`;
-    }
+    this.header.textContent = `${this.name} (${this.count})`;
   }
   remove(el) {
     this.ul.removeChild(el);
@@ -74,7 +71,7 @@ if (localStorage.getItem("nickname")) {
 }
 
 function login(nickname) {
-  socket.emit("login", nickname);
+  console.log("emit");console.log("emit");socket.emit("login", nickname);
 }
 
 socket.on("nickInvalid", (name, reason) => {
@@ -105,18 +102,13 @@ const RoomList = new UpdatingList((li, room) => {
   return li;
 }, "Rooms");
 
-socket.on("rooms", (arr) => {
-  for (let i = 0; i < arr.length; ++i) {
-    Room.create(arr[i], arr[++i]);
-  }
-  RoomList.init(rooms, jd.f(".people"));
-});
+jd.f("form", RoomList.el).addEventListener("submit", e => {
+  e.preventDefault();
 
-socket.on("-room", id => {
-  RoomList.remove(rooms[id].li);
-  delete rooms[id];
-});
+  console.log("emit");console.log("emit");socket.emit("+room", jd.f(`input[type="text"]`, e.target).value, jd.f(`input[type="checkbox"]`, e.target).value); // room name, is private?
 
+  return false;
+});
 
 
 socket.on("join", (roomId, arr) => {
@@ -162,9 +154,10 @@ function getTime() {
 let lastMessage = 0;
 
 class Room {
-  constructor(id, name) {
+  constructor(id, name, settings) {
     this.name = name;
     this.id = id;
+    this.isPrivate = settings.isPrivate;
   }
 
   setUpWindow() {
@@ -189,7 +182,7 @@ class Room {
       if (Date.now() - lastMessage < 100 || !message.length)  return;
       lastMessage = Date.now();
 
-      socket.emit("tell", this.id, message);
+      console.log("emit");socket.emit("tell", this.id, message);
       this.input.value = "";
       this.addMessage(message, users[myId]);
 
@@ -199,7 +192,7 @@ class Room {
     this.feed = jd.f(".feed", this.el);
 
     jd.f("button", jd.f("header", this.el)).addEventListener("click", e => {
-      socket.emit("leave", this.id);
+      console.log("emit");socket.emit("leave", this.id);
     });
   }
   leave() {
@@ -236,11 +229,33 @@ class Room {
 }
 
 const rooms = {};
-Room.create = (id, name) => {
-  const room = new Room(id, name);
+Room.create = (...args) => {
+  const room = new Room(...args);
   rooms[room.id] = room;
   return room;
 };
+
+socket.on("rooms", (arr) => {
+  for (let i = 0; i < arr.length; i += 3) {
+    Room.create(arr[i], arr[i + 1], {isPrivate: arr[i + 2]});
+  }
+  RoomList.init(rooms, jd.f(".people"));
+});
+
+socket.on("-room", id => {
+  RoomList.remove(rooms[id].li);
+  delete rooms[id];
+});
+
+socket.on("+room", (id, name, isPrivate) => {
+  RoomList.add(Room.create(id, name, {isPrivate}));
+});
+
+socket.on("roomInvalid", (name, reason) => {
+  jd.f(".error", jd.f("form", RoomList.el)).textContent = `Name "${name}" ${reason}.`;
+});
+
+
 
 const Notify = (() => {
   let tabActive = true;
@@ -251,7 +266,6 @@ const Notify = (() => {
       tabActive = false;
   });
 
-  window.AudioContext = window.AudioContext || window.webkitAudioContext;
   const context = AudioContext ? new AudioContext() : null;
 
   return {

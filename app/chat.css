@@ -44,6 +44,10 @@ input {
   padding: 4px;
 }
 
+h4 {
+  margin: 0;
+}
+
 .error {
   color: red;
 }
@@ -128,11 +132,11 @@ input {
   flex-flow: column;
 }
 
-.people .message {
+.rooms .message {
   order: -10;
 }
 
-.people .rooms {
+.rooms .updating-list {
   overflow-y: auto;
   flex: 1;
 }
