@@ -5,6 +5,9 @@ window.jd = ((window, document) => {
   const cache = {};
   function find(selector, parent) {
     if (parent) {
+      if (typeof parent === "string") {
+        parent = find(parent);
+      }
       return parent.querySelector(selector);
     } else {
       return cache[selector] || (cache[selector] = document.querySelector(selector));

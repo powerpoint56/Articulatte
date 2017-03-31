@@ -1,1 +1,1 @@
-web: node server/index.js prod
+web: node server/index.js

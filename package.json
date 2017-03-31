@@ -1,5 +1,5 @@
 {
-  "name": "talk",
+  "name": "Articulatte",
   "version": "1.0.0",
   "description": "chat web app using socket.io",
   "main": "server/index.js",

@@ -83,9 +83,10 @@ io.on("connection", socket => {
 
   socket.on("login", nickname => {
     nickname = nickname.trim().substr(0, 20) || `anonymous ${animalia.random()}`; // mult' animalia!!
-    for (let user in users) {
-      if (user.nickname === nickname) {
-        socket.emit("nick taken");
+
+    for (let x in users) {
+      if (users[x].nickname === nickname) {
+        socket.emit("nickInvalid", nickname, "taken");
         return;
       }
     }

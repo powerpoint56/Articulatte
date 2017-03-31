@@ -13,8 +13,12 @@
     <script src="/socket.io/socket.io.js"></script>
   </head>
   <body>
-    <div class="dash"></div>
     <div class="main">
+      <form class="nickname">
+        <label>Enter a nickname: <input placeholder="anonymous"></label>
+        <button class="f-submit fa fa-arrow-right"></button>
+        <div class="error"></div>
+      </form>
       <div class="people"></div>
     </div>
     <script src="chat.js"></script>

@@ -1,1 +1,2 @@
 - rooms list, making rooms
+- handle server restart

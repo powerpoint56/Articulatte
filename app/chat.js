@@ -9,7 +9,7 @@ class User {
     this.nickname = nickname;
 
     this.hueRotate = id * 65;
-    this.hsl = `hsl(${210 + this.hueRotate}, 75%, 60%)`;
+    this.hsl = `hsl(${210 + this.hueRotate}, 75%, 40%)`;
   }
   createIcon() {
     return jd.c("img", {class: "m-icon", style: {filter: `hue-rotate(${this.hueRotate}deg)`}});
@@ -28,30 +28,29 @@ let myId;
 
 const socket = io();
 
-// "nick taken"
+const nicknameForm = jd.f(".nickname", ".main").addEventListener("submit", e => {
+  e.preventDefault();
 
-if (window.localStorage.getItem("nickname")) {
-  login(window.localStorage.getItem("nickname"));
-} else {
-  jd.c("form", {class: "nickname"}, [
-    jd.c("label", "Enter a nickname: ", [
-      jd.c("input", {placeholder: "anonymous"}),
-      jd.c("button", {class: "f-submit fa fa-reply"})
-    ])
-  ], jd.f(".main")).addEventListener("submit", e => {
-    e.preventDefault();
+  login(jd.f("input", e.target).value);
 
-    let nickname = jd.f("input", e.target).value;
+  return false;
+});
 
-    jd.f(".main").removeChild(e.target);
-
-    login(nickname);
-
-    return false;
-  });
+if (localStorage.getItem("nickname")) {
+  login(localStorage.getItem("nickname"));
 }
 
+function login(nickname) {
+  socket.emit("login", nickname);
+}
+
+socket.on("nickInvalid", (name, reason) => {
+  jd.f(".error", nicknameForm).textContent = `Nickname "${name}" ${reason}.`;
+});
+
 socket.on("login", (id, nickname) => {
+  jd.f(".main").removeChild(jd.f(".nickname", ".main"));
+
   myId = id;
   User.create(id, nickname);
 
@@ -110,9 +109,6 @@ socket.on("left", roomId => {
 });
 
 
-function login(nickname) {
-  socket.emit("login", nickname);
-}
 
 const date = new Date();
 function getTime() {

@@ -44,6 +44,10 @@ input {
   padding: 4px;
 }
 
+.error {
+  color: red;
+}
+
 .main {
   flex-flow: row;
   flex: 1 0;
