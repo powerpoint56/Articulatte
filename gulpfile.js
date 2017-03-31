@@ -14,7 +14,7 @@ const src = "./app";
 const dest = "./dist";
 
 gulp.task("js", () => {
-    gulp.src([src + "*.js"])
+    gulp.src([`${src}/polyfills.js`, `${src}/jdom.js`, `${src}/chat.js`])
         .pipe(babel({presets: ["es2015"]}))
         .pipe(uglify())
         .pipe(concat("build.js"))
