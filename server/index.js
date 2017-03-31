@@ -2,7 +2,7 @@
 
 const isProduction = process.argv[2] === "prod";
 
-const http = require(isProduction ? "https" : "http");
+const http = require("http");
 const nodeStatic = require("node-static");
 //const shortid = require("shortid");
 const animalia = require("./animalia.js");
