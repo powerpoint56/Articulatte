@@ -124,6 +124,17 @@ input {
   background: #f3f3f5;
   padding: 8px;
   order: 100;
+  display: flex;
+  flex-flow: column;
+}
+
+.people .message {
+  order: -10;
+}
+
+.people .rooms {
+  overflow-y: auto;
+  flex: 1;
 }
 
 .nickname {

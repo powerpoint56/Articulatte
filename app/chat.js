@@ -7,7 +7,7 @@ class UpdatingList {
     this.name = name;
     this.buildItem = buildItem;
 
-    this.ul = jd.c("ul");
+    this.ul = jd.c("ul", {class: "rooms"});
     this.header = jd.c("h4", name);
     this.el = jd.c("div", {class: "updating-list"}, [
       this.header,
@@ -15,8 +15,8 @@ class UpdatingList {
     ]);
   }
   init(arr, parent) {
-    for (let x of arr) {
-      this.add(x, false);
+    for (let x in arr) {
+      this.add(arr[x], false);
     }
 
     parent.appendChild(this.el);
@@ -99,19 +99,21 @@ socket.on("login", (id, nickname) => {
 });
 
 
-const RoomList = new UpdatingList("Rooms", (li, room) => {
+const RoomList = new UpdatingList((li, room) => {
   li.textContent = room.name;
+  room.li = li;
   return li;
-});
+}, "Rooms");
 
 socket.on("rooms", (arr) => {
   for (let i = 0; i < arr.length; ++i) {
     Room.create(arr[i], arr[++i]);
   }
-  RoomList.init(arr);
+  RoomList.init(rooms, jd.f(".people"));
 });
 
 socket.on("-room", id => {
+  RoomList.remove(rooms[id].li);
   delete rooms[id];
 });
 
