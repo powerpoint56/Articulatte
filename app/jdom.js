@@ -21,7 +21,11 @@ window.jd = ((window, document) => {
     } else if (attributes !== null && typeof attributes === "object") {
       for (let x in attributes) {
         if (x === "_") {
-          el.textContent = attributes[x];
+          if (attributes[x] instanceof HTMLElement) {
+            el.appendChild(attributes[x]);
+          } else {
+            el.textContent = attributes[x];
+          }
         } else if (attributes[x] !== null && typeof attributes[x] === "object") {
           if (x === "style") {
             for (let y in attributes[x]) {

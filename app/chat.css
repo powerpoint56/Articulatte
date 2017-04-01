@@ -93,16 +93,15 @@ h4 {
 }
 
 .message {
-  padding: 4px;
   font-size: 100%;
-  margin: 4px;
+  margin: 8px;
   display: flex;
 }
 
 .m-icon {
   background: url("default.jpg");
-  width: 48px;
-  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
   border: 1px solid black;
 }
 
@@ -136,6 +135,11 @@ h4 {
   order: 100;
   display: flex;
   flex-flow: column;
+  margin-left: auto;
+}
+
+.rooms {
+  margin: 8px;
 }
 
 .rooms .message {

@@ -84,7 +84,7 @@ if (localStorage.getItem("nickname")) {
 }
 
 function login(nickname) {
-  socket.emit("login", nickname);
+  socket.emit("login", nickname, location.hash ? location.hash.slice(1) : undefined);
 }
 
 socket.on("nickInvalid", (name, reason) => {
@@ -115,6 +115,9 @@ socket.on("login", (id, nickname) => {
 
 
 const RoomList = new UpdatingList((li, room) => {
+  if (room.isPrivate) {
+    li.classList.add("hide");
+  }
   li.textContent = room.name;
   li.addEventListener("click", () => {
     socket.emit("join", room.id);
@@ -125,8 +128,9 @@ const RoomList = new UpdatingList((li, room) => {
 }, "Rooms");
 
 
-socket.on("join", (roomId, arr) => {
-  rooms[roomId].setUpWindow();
+socket.on("join", (roomId, roomCode, arr) => {
+  const room = rooms[roomId];
+  room.setUpWindow();
 
   let members = [];
   for (let i = 0; i < arr.length; i+=2) {
@@ -134,11 +138,20 @@ socket.on("join", (roomId, arr) => {
     members.push(arr[i+1]);
   }
 
-  let update = "joined room " + rooms[roomId].name;
+  let update = "joined room " + room.name;
   if (members.length) {
     update += " with " + members.join(", ");
   }
-  rooms[roomId].addUpdate(update, users[myId]);
+  room.addUpdate(update, users[myId]);
+
+  const roomLink = `${location.origin}/#${roomCode}`;
+  room.addUpdate(jd.c("span", "share link: ", [
+    jd.c("a", {_: roomLink, href: roomLink})
+  ]));
+
+  if (room.isPrivate) {
+    room.li.classList.remove("hide");
+  }
 });
 
 socket.on("tell", (roomId, content, userId) => {
@@ -177,20 +190,21 @@ class Room {
 
   setUpWindow() {
     this.el = jd.c("div", {class: "window"}, [
-      jd.c("header", "Room", [
+      jd.c("header", this.name, [
         jd.c("button", {class: "fa fa-times", events: {click: e => {
           socket.emit("leave", this.id);
         }}})
       ]),
       jd.c("div", {class: "feed"}),
       jd.c("form", {class: "field"}, [
-        jd.c("input", {class: "f-input", maxlength: 1000, autofocus: true}),
+        jd.c("input", {class: "f-input", maxlength: 1000}),
         jd.c("button", {class: "f-submit fa fa-reply"})
       ])
     ], jd.f(".main"));
 
     this.field = jd.f(".field", this.el);
     this.input = jd.f(".f-input", this.field);
+    this.input.focus();
 
     this.field.addEventListener("submit", e => {
       e.preventDefault();
@@ -265,7 +279,6 @@ socket.on("rooms", (arr) => {
 });
 
 socket.on("-room", id => {
-  console.log("heya");
   RoomList.remove(rooms[id].li);
   delete rooms[id];
 });
@@ -273,7 +286,7 @@ socket.on("-room", id => {
 jd.f("form", RoomList.el).addEventListener("submit", e => {
   e.preventDefault();
 
-  socket.emit("+room", jd.f(`input[type="text"]`, e.target).value, jd.f(`input[type="checkbox"]`, e.target).value); // room name, is private?
+  socket.emit("+room", jd.f(`input[type="text"]`, e.target).value, jd.f(`input[type="checkbox"]`, e.target).checked); // room name, is private?
   return false;
 });
 

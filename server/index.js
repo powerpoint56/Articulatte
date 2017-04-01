@@ -4,7 +4,7 @@ const isProduction = process.argv[2] === "prod";
 
 const http = require("http");
 const nodeStatic = require("node-static");
-//const shortid = require("shortid");
+const shortid = require("shortid");
 const animalia = require("./animalia.js");
 
 let file = new nodeStatic.Server(isProduction ? "./dist" : "./app");
@@ -42,6 +42,8 @@ class Room {
     this.isPrivate = !!settings.isPrivate;
     this.isPermanent = !!settings.isPermanent;
     this.creatorId = settings.creatorId;
+
+    this.code = shortid.generate();
   }
   info() {
     return [this.id, this.name, this.creatorId, this.isPrivate];
@@ -71,8 +73,20 @@ io.on("connection", socket => {
 
   socket.emit("rooms", Room.all());
 
-  function joinRoom(room) {
-    if (!room || user.roomIds.has(room.id)) return;
+  function joinRoom(room, code) {
+    if (room && user.roomIds.has(room.id)) return;
+
+    if (!room) { // just a code passed in
+      for (let x in rooms) {
+        if (rooms[x].code === code) {
+          room = rooms[x];
+          break;
+        }
+      }
+      if (!room) return;
+    } else if (room.isPrivate && code !== room.code) {
+      return;
+    }
 
     let reply = [];
 
@@ -84,13 +98,13 @@ io.on("connection", socket => {
     });
 
     socket.join(room.id);
-    socket.emit("join", room.id, reply);
+    socket.emit("join", room.id, room.code, reply);
 
     room.memberIds.add(user.id);
     user.roomIds.add(room.id);
   }
 
-  socket.on("login", nickname => {
+  socket.on("login", (nickname, roomCode) => {
     nickname = nickname.trim().substr(0, 20) || `anonymous ${animalia.random()}`; // mult' animalia!!
 
     if (nickname.length <= 2) {
@@ -104,7 +118,11 @@ io.on("connection", socket => {
     user.nickname = nickname;
     socket.emit("login", user.id, user.nickname);
 
-    joinRoom(Home);
+    if (roomCode) {
+      joinRoom(null, roomCode);
+    } else {
+      joinRoom(Home);
+    }
   });
 
   socket.on("tell", (roomId, content) => {
@@ -158,7 +176,7 @@ io.on("connection", socket => {
 
     const room = Room.create(name, {isPrivate, creatorId: user.id});
     io.sockets.emit("+room", ...room.info());
-    joinRoom(room);
+    joinRoom(room, room.code);
   });
 
   socket.on("join", id => {
