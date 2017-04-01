@@ -109,11 +109,7 @@ io.on("connection", socket => {
 
   socket.on("tell", (roomId, content) => {
     content = content.trim().substr(0, 1000);
-    rooms[roomId].memberIds.forEach(id => {
-      if (id !== user.id) {
-        users[id].socket.emit("tell", roomId, content, user.id);
-      }
-    });
+    socket.broadcast.emit("tell", roomId, content, user.id);
   });
 
   socket.on("leave", roomId => {
@@ -135,19 +131,17 @@ io.on("connection", socket => {
     room.memberIds.delete(user.id);
     user.roomIds.delete(room.id);
 
-    room.memberIds.forEach(id => {
-      users[id].socket.emit("-member", room.id, user.id);
-    });
-
     if (!room.isPermanent && !room.memberIds.size) {
       deleteRoom(room);
     }
 
     socket.leave(room.id);
+
+    socket.to(room.id).emit("-member", room.id, user.id);
   }
 
   function deleteRoom(room) {
-    io.to(room.id).emit("-room", room.id);
+    io.sockets.emit("-room", room.id);
     delete rooms[room.id];
   }
 
