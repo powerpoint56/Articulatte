@@ -299,8 +299,8 @@ jd.f("form", RoomList.el).addEventListener("submit", e => {
 socket.on("+room", (id, name, creatorId, isPrivate) => {
   RoomList.add(Room.create(id, name, {creatorId, isPrivate}));
   if (creatorId === myId) {
-    jd.f("form", this.el).reset();
-    jd.f("form", this.el).classList.add("hide");
+    jd.f("form", ".rooms").reset();
+    jd.f("form", ".rooms").classList.add("hide");
   }
 });
 
