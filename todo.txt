@@ -1,2 +1,3 @@
-- rooms list, making rooms
+- save private rooms in localStorage so that they show in list
+- one permanent room per user, five rooms total
 - handle server restart

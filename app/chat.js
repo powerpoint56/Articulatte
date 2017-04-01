@@ -133,10 +133,11 @@ const RoomList = new UpdatingList((li, room) => {
 
 socket.on("join", (roomId, roomCode, arr) => {
   const room = rooms[roomId];
+  room.link = `${location.origin}/#${roomCode}`;
   room.setUpWindow();
 
   let members = [];
-  for (let i = 0; i < arr.length; i+=2) {
+  for (let i = 0; i < arr.length; i += 2) {
     User.create(arr[i], arr[i+1]);
     members.push(arr[i+1]);
   }
@@ -146,11 +147,6 @@ socket.on("join", (roomId, roomCode, arr) => {
     update += " with " + members.join(", ");
   }
   room.addUpdate(update, users[myId]);
-
-  const roomLink = `${location.origin}/#${roomCode}`;
-  room.addUpdate(jd.c("span", "share link: ", [
-    jd.c("a", {_: roomLink, href: roomLink})
-  ]));
 
   if (room.isPrivate) {
     room.li.classList.remove("hide");
@@ -187,13 +183,19 @@ class Room {
   constructor(id, name, settings) {
     this.name = name;
     this.id = id;
-    this.isPrivate = settings.isPrivate;
+    this.isPrivate = !!settings.isPrivate;
     this.creatorId = settings.creatorId;
+    this.isPermanent = !!settings.isPermanent;
   }
 
   setUpWindow() {
     this.el = jd.c("div", {class: "window"}, [
-      jd.c("header", {_: this.name, style: (this.creator ? {color: this.creator.hsl} : null)}, [
+      jd.c("header", null, [
+        jd.c("span", null, [
+          jd.c("a", {_: jd.c("button", {class: "fa fa-link"}), href: this.link}),
+          jd.c("a", {_: jd.c("button", {class: "fa fa-envelope"}), href: `mailto:?subject=Articulatte%20room%20invite&body=Join%20here!%20${this.link}`}),
+        ]),
+        jd.c("span", {_: this.name, style: (this.creator ? {color: this.creator.hsl} : null)}),
         jd.c("button", {class: "fa fa-times", events: {click: e => {
           socket.emit("leave", this.id);
         }}})
@@ -278,8 +280,8 @@ Room.create = (...args) => {
 };
 
 socket.on("rooms", (arr) => {
-  for (let i = 0; i < arr.length; i += 4) {
-    Room.create(arr[i], arr[i + 1], {creatorId: arr[i + 2], isPrivate: arr[i + 3]});
+  for (let i = 0; i < arr.length; i += 5) {
+    Room.create(arr[i], arr[i + 1], {creatorId: arr[i + 2], isPrivate: !!arr[i + 3], isPermanent: !!arr[i + 4]});
   }
   RoomList.init(rooms, jd.f(".people"));
 });
@@ -289,23 +291,37 @@ socket.on("-room", id => {
   delete rooms[id];
 });
 
-jd.f("form", RoomList.el).addEventListener("submit", e => {
-  e.preventDefault();
+const roomForm = {
+  el: jd.f("form", RoomList.el),
+  privateCount: 5,
+  permanentCount: 1
+};
+roomForm.name = jd.f(`input[type="text"]`, roomForm.el);
+roomForm.isPrivate = jd.f(`label[name="priv"]`, roomForm.el);
+roomForm.isPermanent = jd.f(`label[name="perm"]`, roomForm.el);
 
-  socket.emit("+room", jd.f(`input[type="text"]`, e.target).value, jd.f(`input[type="checkbox"]`, e.target).checked); // room name, is private?
+roomForm.el.addEventListener("submit", e => {
+  e.preventDefault();
+  socket.emit("+room", roomForm.name.value.trim(), jd.f("input", roomForm.isPrivate).checked ? 1 : 0, jd.f("input", roomForm.isPermanent).checked ? 1 : 0);
   return false;
 });
 
-socket.on("+room", (id, name, creatorId, isPrivate) => {
-  RoomList.add(Room.create(id, name, {creatorId, isPrivate}));
+socket.on("+room", (id, name, creatorId, isPrivate, isPermanent) => {
+  RoomList.add(Room.create(id, name, {creatorId, isPrivate, isPermanent}));
   if (creatorId === myId) {
     jd.f("form", ".rooms").reset();
     jd.f("form", ".rooms").classList.add("hide");
+    if (isPrivate && --roomForm.privateCount <= 0) {
+      roomForm.el.removeChild(roomForm.isPrivate);
+    }
+    if (isPermanent && --roomForm.permanentCount <= 0) {
+      roomForm.el.removeChild(roomForm.isPermanent);
+    }
   }
 });
 
 socket.on("roomInvalid", (name, reason) => {
-  jd.f(".error", jd.f("form", RoomList.el)).textContent = `Name "${name}" ${reason}.`;
+  jd.f(".error", roomForm.el).textContent = `Name "${name}" ${reason}.`;
 });
 
 

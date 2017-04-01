@@ -46,7 +46,7 @@ class Room {
     this.code = shortid.generate();
   }
   info() {
-    return [this.id, this.name, this.creatorId, this.isPrivate];
+    return [this.id, this.name, this.creatorId, (this.isPrivate ? 1 : 0), (this.isPermanent ? 1 : 0)];
   }
 }
 
@@ -70,6 +70,8 @@ const Home = Room.create("Home", {isPermanent: true});
 io.on("connection", socket => {
   const user = User.create();
   user.socket = socket;
+
+  let permanentCount = 1, privateCount = 5;
 
   socket.emit("rooms", Room.all());
 
@@ -160,10 +162,11 @@ io.on("connection", socket => {
 
   function deleteRoom(room) {
     io.sockets.emit("-room", room.id);
+    if (room)
     delete rooms[room.id];
   }
 
-  socket.on("+room", (name, isPrivate) => {
+  socket.on("+room", (name, isPrivate, isPermanent) => {
     name = name.trim().substr(0, 20);
     if (name.length <= 2) {
       return socket.emit("roomInvalid", name, "too short");
@@ -174,7 +177,14 @@ io.on("connection", socket => {
       }
     }
 
-    const room = Room.create(name, {isPrivate, creatorId: user.id});
+    if (isPrivate && privateCount-- <= 0) {
+      isPrivate = false;
+    }
+    if (isPermanent && permanentCount-- <= 0) {
+      isPermanent = false;
+    }
+
+    const room = Room.create(name, {isPrivate, isPermanent, creatorId: user.id});
     io.sockets.emit("+room", ...room.info());
     joinRoom(room, room.code);
   });

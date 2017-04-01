@@ -38,6 +38,11 @@ header {
   justify-content: space-between;
 }
 
+header a {
+  color: inherit;
+  text-decoration: none;
+}
+
 input {
   font-size: 100%;
   font-family: inherit;
@@ -86,6 +91,7 @@ h4 {
 
 .f-input {
   flex: 1 0;
+  width: auto;
 }
 
 .f-reply {
