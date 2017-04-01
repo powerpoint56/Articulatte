@@ -9,7 +9,11 @@ class UpdatingList {
 
     this.el = jd.f(".rooms");
     this.ul = jd.f("ul", this.el);
-    this.header = jd.f("h4", this.el);
+    this.header = jd.f("span", this.el);
+    jd.f("button", this.el).addEventListener("click", e => {
+      jd.f("form", this.el).classList.toggle("hide");
+      jd.f("input", this.el).focus();
+    });
 
     this.count = 0;
   }
@@ -38,14 +42,19 @@ class User {
     this.id = id;
     this.nickname = nickname;
 
+    this.displayName = nickname;
+    if (myId === id) {
+      this.displayName += " (me)";
+    }
+
     this.hueRotate = id * 65;
-    this.hsl = `hsl(${210 + this.hueRotate}, 75%, 40%)`;
+    this.hsl = `hsl(${210 + this.hueRotate}, 75%, 50%)`;
   }
   createIcon() {
     return jd.c("img", {class: "m-icon", style: {filter: `hue-rotate(${this.hueRotate}deg)`}});
   }
   createLabel() {
-    return jd.c("span", {_: this.nickname, style: {color: this.hsl}});
+    return jd.c("span", {_: this.displayName, style: {color: this.hsl}});
   }
 }
 User.create = (...args) => {
@@ -68,6 +77,8 @@ const nicknameForm = jd.f(".nickname", ".main").addEventListener("submit", e => 
 
 if (localStorage.getItem("nickname")) {
   login(localStorage.getItem("nickname"));
+} else {
+  nicknameForm.classList.remove("hide");
 }
 
 function login(nickname) {
@@ -76,6 +87,9 @@ function login(nickname) {
 
 socket.on("nickInvalid", (name, reason) => {
   jd.f(".error", nicknameForm).textContent = `Nickname "${name}" ${reason}.`;
+  if (nicknameForm) {
+    nicknameForm.classList.remove("hide");
+  }
 });
 
 socket.on("login", (id, nickname) => {
@@ -98,17 +112,13 @@ socket.on("login", (id, nickname) => {
 
 const RoomList = new UpdatingList((li, room) => {
   li.textContent = room.name;
+  li.addEventListener("click", () => {
+    socket.emit("join", room.id);
+  });
+
   room.li = li;
   return li;
 }, "Rooms");
-
-jd.f("form", RoomList.el).addEventListener("submit", e => {
-  e.preventDefault();
-
-  socket.emit("+room", jd.f(`input[type="text"]`, e.target).value, jd.f(`input[type="checkbox"]`, e.target).value); // room name, is private?
-
-  return false;
-});
 
 
 socket.on("join", (roomId, arr) => {
@@ -158,6 +168,7 @@ class Room {
     this.name = name;
     this.id = id;
     this.isPrivate = settings.isPrivate;
+    this.creatorId = settings.creatorId;
   }
 
   setUpWindow() {
@@ -167,7 +178,7 @@ class Room {
       ]),
       jd.c("div", {class: "feed"}),
       jd.c("form", {class: "field"}, [
-        jd.c("input", {class: "f-input", maxlength: 1000}),
+        jd.c("input", {class: "f-input", maxlength: 1000, autofocus: true}),
         jd.c("button", {class: "f-submit fa fa-reply"})
       ])
     ], jd.f(".main"));
@@ -183,7 +194,7 @@ class Room {
       lastMessage = Date.now();
 
       socket.emit("tell", this.id, message);
-      this.input.value = "";
+      e.target.reset();
       this.addMessage(message, users[myId]);
 
       return false;
@@ -204,16 +215,25 @@ class Room {
   }
 
   addMessage(text, sender) {
-    jd.c("div", {class: "message"}, [
-      sender.createIcon(),
-      jd.c("div", {class: "m-content"}, [
+    const textEl = jd.c("div", {class: "m-text", _: text});
+
+    if (this.lastSenderId === sender.id) {
+      this.lastContent.appendChild(textEl);
+    } else {
+      this.lastContent = jd.c("div", {class: "m-content"}, [
         jd.c("div", {class: "m-header"}, [
           sender.createLabel(),
           jd.c("span", {class: "m-time", _: getTime()})
         ]),
-        jd.c("div", {class: "m-text", _: text})
-      ])
-    ], this.feed);
+        textEl
+      ]);
+      jd.c("div", {class: "message"}, [
+        sender.createIcon(),
+        this.lastContent
+      ], this.feed);
+    }
+    this.lastSenderId = sender.id;
+
     this.scroll();
     Notify.beep();
   }
@@ -236,19 +256,31 @@ Room.create = (...args) => {
 };
 
 socket.on("rooms", (arr) => {
-  for (let i = 0; i < arr.length; i += 3) {
-    Room.create(arr[i], arr[i + 1], {isPrivate: arr[i + 2]});
+  for (let i = 0; i < arr.length; i += 4) {
+    Room.create(arr[i], arr[i + 1], {creatorId: arr[i + 2], isPrivate: arr[i + 3]});
   }
   RoomList.init(rooms, jd.f(".people"));
 });
 
 socket.on("-room", id => {
+  console.log("heya");
   RoomList.remove(rooms[id].li);
   delete rooms[id];
 });
 
-socket.on("+room", (id, name, isPrivate) => {
-  RoomList.add(Room.create(id, name, {isPrivate}));
+jd.f("form", RoomList.el).addEventListener("submit", e => {
+  e.preventDefault();
+
+  socket.emit("+room", jd.f(`input[type="text"]`, e.target).value, jd.f(`input[type="checkbox"]`, e.target).value); // room name, is private?
+  return false;
+});
+
+socket.on("+room", (id, name, creatorId, isPrivate) => {
+  RoomList.add(Room.create(id, name, {creatorId, isPrivate}));
+  if (creatorId === myId) {
+    jd.f("form", this.el).reset();
+    jd.f("form", this.el).classList.add("hide");
+  }
 });
 
 socket.on("roomInvalid", (name, reason) => {
@@ -277,7 +309,7 @@ const Notify = (() => {
       osc.connect(gain);
       osc.frequency.value = 587.33;
 
-      gain.gain.setValueAtTime(0, 0);
+      gain.gain.setValueAtTime(0, context.currentTime);
       gain.gain.linearRampToValueAtTime(0.8, context.currentTime + 0.1);
       gain.gain.linearRampToValueAtTime(0, context.currentTime + 0.7);
       gain.connect(context.destination);

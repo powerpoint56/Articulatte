@@ -13,21 +13,22 @@
   </head>
   <body>
     <div class="main">
-      <form class="nickname">
-        <label>Enter a nickname: <input placeholder="anonymous"></label>
+      <form class="nickname hide">
+        <label>Enter a nickname: <input placeholder="anonymous" autofocus></label>
         <button class="f-submit fa fa-arrow-right"></button>
         <div class="error"></div>
       </form>
       <div class="people">
         <div class="rooms">
-          <h4>Rooms</h4>
-          <form id="create-room">
-            <h4>Create room</h4>
+          <span>Rooms</span><button class="fa fa-plus new-button"></button>
+          <form class="hide">
+            <h4>new room</h4>
             <input type="text" maxlength="20" placeholder="room name"><br>
             <label><input type="checkbox">Private</label>
             <button class="f-submit fa fa-arrow-right"></button>
+            <div class="error"></div>
           </form>
-          <ul></ul>
+          <ul class="updating-list"></ul>
         </div>
       </div>
     </div>

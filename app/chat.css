@@ -42,6 +42,7 @@ input {
   font-size: 100%;
   font-family: inherit;
   padding: 4px;
+  margin: 2px;
 }
 
 h4 {
@@ -51,6 +52,11 @@ h4 {
 .error {
   color: red;
 }
+
+.hide {
+  display: none;
+}
+
 
 .main {
   flex-flow: row;
@@ -89,7 +95,7 @@ h4 {
 .message {
   padding: 4px;
   font-size: 100%;
-  margin: 0 4px 4px 4px;
+  margin: 4px;
   display: flex;
 }
 
@@ -120,7 +126,7 @@ h4 {
 
 .update {
   color: #929294;
-  margin: 0 4px 4px 4px;
+  margin: 4px;
 }
 
 .people {
@@ -136,9 +142,26 @@ h4 {
   order: -10;
 }
 
-.rooms .updating-list {
+.updating-list {
   overflow-y: auto;
   flex: 1;
+  list-style: none;
+  padding-left: 0;
+  margin: 4px;
+  cursor: pointer;
+}
+
+.updating-list li {
+  color: #626262;
+  padding: 4px;
+}
+
+.updating-list li:hover, .updating-list li:active {
+  background: #f6f6f8;
+}
+
+.rooms form {
+  margin: 4px;
 }
 
 .nickname {

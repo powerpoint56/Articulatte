@@ -10,7 +10,7 @@ const animalia = require("./animalia.js");
 let file = new nodeStatic.Server(isProduction ? "./dist" : "./app");
 
 let server = http.createServer((req, res) => {
-    req.addListener("end", () => {
+    req.on("end", () => {
         file.serve(req, res);
     }).resume();
 }).listen(process.env.PORT || 3000);
@@ -33,7 +33,7 @@ User.create = () => {
 
 
 class Room {
-  constructor(name, settings = {isPrivate: false, isPermanent: false}) {
+  constructor(name, settings = {isPrivate: false, isPermanent: false, creatorId: -1}) {
     this.name = name;
     this.id = Room.id++;
 
@@ -41,9 +41,10 @@ class Room {
 
     this.isPrivate = !!settings.isPrivate;
     this.isPermanent = !!settings.isPermanent;
+    this.creatorId = settings.creatorId;
   }
   info() {
-    return [this.id, this.name, this.isPrivate];
+    return [this.id, this.name, this.creatorId, this.isPrivate];
   }
 }
 
@@ -82,6 +83,7 @@ io.on("connection", socket => {
       users[id].socket.emit("+member", room.id, user.id, user.nickname);
     });
 
+    socket.join(room.id);
     socket.emit("join", room.id, reply);
 
     room.memberIds.add(user.id);
@@ -91,10 +93,12 @@ io.on("connection", socket => {
   socket.on("login", nickname => {
     nickname = nickname.trim().substr(0, 20) || `anonymous ${animalia.random()}`; // mult' animalia!!
 
+    if (nickname.length <= 2) {
+      return socket.emit("nickInvalid", nickname, "too short");
+    }
     for (let x in users) {
       if (users[x].nickname === nickname) {
-        socket.emit("nickInvalid", nickname, "taken");
-        return;
+        return socket.emit("nickInvalid", nickname, "taken");
       }
     }
     user.nickname = nickname;
@@ -113,8 +117,8 @@ io.on("connection", socket => {
   });
 
   socket.on("leave", roomId => {
-    leaveRoom(rooms[roomId]);
     socket.emit("left", roomId);
+    leaveRoom(rooms[roomId]);
   });
 
   socket.on("disconnect", () => {
@@ -138,23 +142,32 @@ io.on("connection", socket => {
     if (!room.isPermanent && !room.memberIds.size) {
       deleteRoom(room);
     }
+
+    socket.leave(room.id);
   }
 
   function deleteRoom(room) {
-    sockets.broadcast(Message.compress("-room", room.id));
+    io.to(room.id).emit("-room", room.id);
     delete rooms[room.id];
   }
 
   socket.on("+room", (name, isPrivate) => {
     name = name.trim().substr(0, 20);
+    if (name.length <= 2) {
+      return socket.emit("roomInvalid", name, "too short");
+    }
     for (let x in rooms) {
-      if (rooms.name === name) {
-        socket.emit("roomInvalid", name, "taken");
-        return;
+      if (rooms[x].name === name) {
+        return socket.emit("roomInvalid", name, "taken");
       }
     }
 
-    const room = Room.create(name, {isPrivate});
+    const room = Room.create(name, {isPrivate, creatorId: user.id});
     io.sockets.emit("+room", ...room.info());
+    joinRoom(room);
+  });
+
+  socket.on("join", id => {
+    joinRoom(rooms[id]);
   });
 });
