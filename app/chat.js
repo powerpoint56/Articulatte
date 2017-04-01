@@ -67,7 +67,9 @@ let myId;
 
 const socket = io();
 
-const nicknameForm = jd.f(".nickname", ".main").addEventListener("submit", e => {
+const nicknameForm = jd.f(".nickname", ".main");
+
+nicknameForm.addEventListener("submit", e => {
   e.preventDefault();
 
   login(jd.f("input", e.target).value);
@@ -87,9 +89,7 @@ function login(nickname) {
 
 socket.on("nickInvalid", (name, reason) => {
   jd.f(".error", nicknameForm).textContent = `Nickname "${name}" ${reason}.`;
-  if (nicknameForm) {
-    nicknameForm.classList.remove("hide");
-  }
+  nicknameForm.classList.remove("hide");
 });
 
 socket.on("login", (id, nickname) => {
@@ -103,7 +103,11 @@ socket.on("login", (id, nickname) => {
     users[myId].createIcon(),
     jd.c("div", {class: "m-content"}, [
       jd.c("div", {class: "m-header"}, [
-        users[myId].createLabel()
+        users[myId].createLabel(),
+        jd.c("button", {class: "fa fa-times", events: {click: () => {
+          localStorage.removeItem("nickname");
+          location.reload();
+        }}})
       ])
     ])
   ], jd.f(".people"));
@@ -174,7 +178,9 @@ class Room {
   setUpWindow() {
     this.el = jd.c("div", {class: "window"}, [
       jd.c("header", "Room", [
-        jd.c("button", {class: "fa fa-times"})
+        jd.c("button", {class: "fa fa-times", events: {click: e => {
+          socket.emit("leave", this.id);
+        }}})
       ]),
       jd.c("div", {class: "feed"}),
       jd.c("form", {class: "field"}, [
@@ -201,10 +207,6 @@ class Room {
     });
 
     this.feed = jd.f(".feed", this.el);
-
-    jd.f("button", jd.f("header", this.el)).addEventListener("click", e => {
-      socket.emit("leave", this.id);
-    });
   }
   leave() {
     jd.f(".main").removeChild(this.el);

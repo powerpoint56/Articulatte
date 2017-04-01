@@ -22,11 +22,17 @@ window.jd = ((window, document) => {
       for (let x in attributes) {
         if (x === "_") {
           el.textContent = attributes[x];
-        } else if (x === "style" && attributes[x] !== null && typeof attributes[x] === "object") {
-          for (let y in attributes[x]) {
-            el.style.setProperty(y, attributes[x][y]);
+        } else if (attributes[x] !== null && typeof attributes[x] === "object") {
+          if (x === "style") {
+            for (let y in attributes[x]) {
+              el.style.setProperty(y, attributes[x][y]);
+            }
+          } else if (x === "events") {
+            for (let y in attributes[x]) {
+              el.addEventListener(y, attributes[x][y]);
+            }
           }
-        } else {
+        } else  {
           el.setAttribute(x, attributes[x]);
         }
       }
