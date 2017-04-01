@@ -118,6 +118,9 @@ const RoomList = new UpdatingList((li, room) => {
   if (room.isPrivate) {
     li.classList.add("hide");
   }
+  if (room.creator) {
+    li.style.color = room.creator.hsl;
+  }
   li.textContent = room.name;
   li.addEventListener("click", () => {
     socket.emit("join", room.id);
@@ -138,7 +141,7 @@ socket.on("join", (roomId, roomCode, arr) => {
     members.push(arr[i+1]);
   }
 
-  let update = "joined room " + room.name;
+  let update = `joined ${room.creator ? room.creator.nickname + "'s" : "welcome"} room ${room.name}`;
   if (members.length) {
     update += " with " + members.join(", ");
   }
@@ -190,7 +193,7 @@ class Room {
 
   setUpWindow() {
     this.el = jd.c("div", {class: "window"}, [
-      jd.c("header", this.name, [
+      jd.c("header", {_: this.name, style: (this.creator ? {color: this.creator.hsl} : null)}, [
         jd.c("button", {class: "fa fa-times", events: {click: e => {
           socket.emit("leave", this.id);
         }}})
@@ -261,6 +264,9 @@ class Room {
   }
   scroll() {
     this.feed.scrollTop = this.feed.scrollHeight;
+  }
+  get creator() {
+    return users[this.creatorId];
   }
 }
 
