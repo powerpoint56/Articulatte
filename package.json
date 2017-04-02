@@ -9,9 +9,11 @@
   "author": "pointprojects",
   "license": "ISC",
   "dependencies": {
+    "node-json-db": "^0.7.3",
     "node-static": "^0.7.9",
     "shortid": "^2.2.6",
-    "socket.io": "^1.7.3"
+    "socket.io": "^1.7.3",
+    "striptags": "^3.0.1"
   },
   "devDependencies": {
     "babel-preset-es2015": "^6.9.0",

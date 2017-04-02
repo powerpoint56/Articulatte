@@ -38,7 +38,7 @@ gulp.task("css", () => {
 });
 
 gulp.task("etal", () => {
-    gulp.src(src + "/default.jpg")
+    gulp.src([src + "/default.jpg", src + "/favicon.ico"])
         .pipe(gulp.dest(dest));
 });
 

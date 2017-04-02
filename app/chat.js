@@ -133,8 +133,6 @@ const RoomList = new UpdatingList((li, room) => {
 
 socket.on("join", (roomId, roomCode, arr) => {
   const room = rooms[roomId];
-  room.link = `${location.origin}/#${roomCode}`;
-  room.setUpWindow();
 
   let members = [];
   for (let i = 0; i < arr.length; i += 2) {
@@ -142,7 +140,14 @@ socket.on("join", (roomId, roomCode, arr) => {
     members.push(arr[i+1]);
   }
 
-  let update = `joined ${room.creator ? room.creator.nickname + "'s" : "welcome"} room ${room.name}`;
+  if (room.el) {
+    return;
+  }
+
+  room.link = `${location.origin}/#${roomCode}`;
+  room.setUpWindow();
+
+  let update = `joined ${room.creator ? room.creator.nickname + "'s" : "the"} room ${room.name}`;
   if (members.length) {
     update += " with " + members.join(", ");
   }
@@ -192,8 +197,16 @@ class Room {
     this.el = jd.c("div", {class: "window"}, [
       jd.c("header", null, [
         jd.c("span", null, [
-          jd.c("a", {_: jd.c("button", {class: "fa fa-link"}), href: this.link}),
-          jd.c("a", {_: jd.c("button", {class: "fa fa-envelope"}), href: `mailto:?subject=Articulatte%20room%20invite&body=Join%20here!%20${this.link}`}),
+          jd.c("button", jd.c("a", {
+            class: "fa fa-link",
+            href: this.link,
+            tabindex: 2
+          })),
+          jd.c("button", jd.c("a", {
+            class: "fa fa-envelope",
+            href: `mailto:?subject=Articulatte%20room%20invite&body=Join%20here!%20${this.link}`,
+            tabindex: 2
+          }))
         ]),
         jd.c("span", {_: this.name, style: (this.creator ? {color: this.creator.hsl} : null)}),
         jd.c("button", {class: "fa fa-times", events: {click: e => {
@@ -202,10 +215,10 @@ class Room {
       ]),
       jd.c("div", {class: "feed"}),
       jd.c("form", {class: "field"}, [
-        jd.c("input", {class: "f-input", maxlength: 1000}),
+        jd.c("input", {class: "f-input", maxlength: 1000, tabindex: 1}),
         jd.c("button", {class: "f-submit fa fa-reply"})
       ])
-    ], jd.f(".main"));
+    ], jd.f(".windows"));
 
     this.field = jd.f(".field", this.el);
     this.input = jd.f(".f-input", this.field);
@@ -214,7 +227,10 @@ class Room {
     this.field.addEventListener("submit", e => {
       e.preventDefault();
 
-      let message = this.input.value.trim().substr(0, 1000);
+      let message = this.input.value.trim().substr(0, 1000).replace(
+          /((http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?)/g,
+          '<a href="$1">$1</a>'
+      );
       if (Date.now() - lastMessage < 100 || !message.length)  return;
       lastMessage = Date.now();
 
@@ -236,7 +252,12 @@ class Room {
   }
 
   addMessage(text, sender) {
-    const textEl = jd.c("div", {class: "m-text", _: text});
+    const textEl = jd.c("div", {class: "m-text"});
+    if (text.includes("<")) {
+      textEl.innerHTML = text; // handle allowed tags
+    } else {
+      textEl.textContent = text;
+    }
 
     if (this.lastSenderId === sender.id) {
       this.lastContent.appendChild(textEl);
@@ -263,6 +284,7 @@ class Room {
       jd.c("span", {class: "m-time", _: getTime()})
     ], jd.f(".feed", this.el));
     this.scroll();
+    this.lastSenderId = -1;
   }
   scroll() {
     this.feed.scrollTop = this.feed.scrollHeight;
@@ -276,14 +298,25 @@ const rooms = {};
 Room.create = (...args) => {
   const room = new Room(...args);
   rooms[room.id] = room;
+
   return room;
 };
 
-socket.on("rooms", (arr) => {
+socket.once("rooms", (arr) => {
   for (let i = 0; i < arr.length; i += 5) {
-    Room.create(arr[i], arr[i + 1], {creatorId: arr[i + 2], isPrivate: !!arr[i + 3], isPermanent: !!arr[i + 4]});
+    Room.create(arr[i], arr[i + 1], {
+      creatorId: arr[i + 2],
+      isPrivate: !!arr[i + 3],
+      isPermanent: !!arr[i + 4]
+    });
   }
   RoomList.init(rooms, jd.f(".people"));
+});
+
+socket.on("reconnect", () => {
+  for (let x in rooms) {
+    socket.emit("join", rooms[x].id);
+  }
 });
 
 socket.on("-room", id => {

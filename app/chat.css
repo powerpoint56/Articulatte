@@ -69,6 +69,12 @@ h4 {
   display: flex;
 }
 
+.windows {
+  display: flex;
+  flex: 1;
+  overflow-x: auto;
+}
+
 .window {
   display: flex;
   flex-flow: column;
@@ -106,8 +112,8 @@ h4 {
 
 .m-icon {
   background: url("default.jpg");
-  min-width: 48px;
-  min-height: 48px;
+  width: 48px;
+  height: 48px;
   border: 1px solid black;
 }
 
@@ -138,7 +144,6 @@ h4 {
   flex: 0 15em;
   background: #f3f3f5;
   padding: 8px;
-  order: 100;
   display: flex;
   flex-flow: column;
   margin-left: auto;

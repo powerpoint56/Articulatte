@@ -5,7 +5,15 @@ const isProduction = process.argv[2] === "prod";
 const http = require("http");
 const nodeStatic = require("node-static");
 const shortid = require("shortid");
+const JsonDB = require("node-json-db");
+const striptags = require("striptags")
+
 const animalia = require("./animalia.js");
+
+const db = new JsonDB("state", true);
+Set.prototype.toJSON = function toJSON() {
+  return [...Set.prototype.values.call(this)];
+};
 
 let file = new nodeStatic.Server(isProduction ? "./dist" : "./app");
 
@@ -35,15 +43,24 @@ User.create = () => {
 class Room {
   constructor(name, settings = {isPrivate: false, isPermanent: false, creatorId: -1}) {
     this.name = name;
-    this.id = Room.id++;
+    if (settings.id) {
+      Room.id = Math.max(settings.id, Room.id + 1);
+      this.id = settings.id;
+    } else {
+      this.id = Room.id++;
+    }
 
-    this.memberIds = new Set();
+    this.memberIds = new Set(settings.memberIds);
 
     this.isPrivate = !!settings.isPrivate;
     this.isPermanent = !!settings.isPermanent;
     this.creatorId = settings.creatorId;
 
-    this.code = shortid.generate();
+    if (settings.isHome) {
+      this.isHome = true;
+    }
+
+    this.code = settings.code || shortid.generate();
   }
   info() {
     return [this.id, this.name, this.creatorId, (this.isPrivate ? 1 : 0), (this.isPermanent ? 1 : 0)];
@@ -55,8 +72,15 @@ Room.id = 0;
 Room.create = (...args) => {
   const room = new Room(...args);
   rooms[room.id] = room;
+  if (!room.isHome) {
+    db.push(`/rooms/${room.id}`, room);
+  }
   return room;
 };
+Room.delete = room => {
+  db.delete(`rooms/${room.id}`);
+  delete rooms[room.id];
+}
 Room.all = () => {
   let data = [];
   for (let x in rooms) {
@@ -65,7 +89,26 @@ Room.all = () => {
   return data;
 };
 
-const Home = Room.create("Home", {isPermanent: true});
+const Home = Room.create("Home", {isPermanent: true, isHome: true});
+
+try {
+  const data = db.getData("/rooms");
+  for (let id in data) {
+    const roomData = data[id];
+    const room = new Room(roomData.name, {
+      isPrivate: roomData.isPrivate,
+      isPermanent: roomData.isPermanent,
+      code: roomData.code,
+      memberIds: roomData.memberIds,
+      id: roomData.id
+    });
+
+    rooms[id] = room;
+  }
+} catch (err) {
+
+}
+
 
 io.on("connection", socket => {
   const user = User.create();
@@ -128,7 +171,7 @@ io.on("connection", socket => {
   });
 
   socket.on("tell", (roomId, content) => {
-    content = content.trim().substr(0, 1000);
+    content = striptags(content.trim().substr(0, 1000), ["a", "em", "strong"]);
     socket.broadcast.emit("tell", roomId, content, user.id);
   });
 
@@ -162,8 +205,7 @@ io.on("connection", socket => {
 
   function deleteRoom(room) {
     io.sockets.emit("-room", room.id);
-    if (room)
-    delete rooms[room.id];
+    Room.delete(room);
   }
 
   socket.on("+room", (name, isPrivate, isPermanent) => {

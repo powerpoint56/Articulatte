@@ -1,3 +1,2 @@
-- save private rooms in localStorage so that they show in list
-- one permanent room per user, five rooms total
-- handle server restart
+- when user reconnects, don't add everything to room list again. Generally fix user reconnect...
+- Tab key scroll through chat windows

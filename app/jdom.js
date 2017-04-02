@@ -18,6 +18,8 @@ window.jd = ((window, document) => {
     const el = document.createElement(tag);
     if (typeof attributes === "string") {
       el.textContent = attributes;
+    } else if (attributes instanceof HTMLElement) {
+      el.appendChild(attributes);
     } else if (attributes !== null && typeof attributes === "object") {
       for (let x in attributes) {
         if (x === "_") {
