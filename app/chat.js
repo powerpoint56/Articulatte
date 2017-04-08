@@ -184,6 +184,14 @@ function getTime() {
 }
 let lastMessage = 0;
 
+const urlRegex = /((http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?)/g;
+const imgRegex = /\.(jpe?g|png|gif)$/g;
+function processUris(text) {
+  return text.replace(urlRegex, match =>
+    `<a href="${match}">${imgRegex.test(match) ? `<img src=${match}>` : match}</a>`
+  );
+}
+
 class Room {
   constructor(id, name, settings) {
     this.name = name;
@@ -227,10 +235,7 @@ class Room {
     this.field.addEventListener("submit", e => {
       e.preventDefault();
 
-      let message = this.input.value.trim().substr(0, 1000).replace(
-          /((http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?)/g,
-          '<a href="$1">$1</a>'
-      );
+      let message = processUris(this.input.value.trim().substr(0, 1000));
       if (Date.now() - lastMessage < 100 || !message.length)  return;
       lastMessage = Date.now();
 

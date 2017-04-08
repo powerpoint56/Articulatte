@@ -171,7 +171,7 @@ io.on("connection", socket => {
   });
 
   socket.on("tell", (roomId, content) => {
-    content = striptags(content.trim().substr(0, 1000), ["a", "em", "strong"]);
+    content = striptags(content.trim().substr(0, 1000), ["a", "em", "strong", "img"]);
     socket.broadcast.emit("tell", roomId, content, user.id);
   });
 

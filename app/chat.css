@@ -85,8 +85,13 @@ h4 {
 .feed {
   flex: 1;
   background: #fff;
-  overflow-y: auto;
+  overflow: auto;
   padding: 8px;
+}
+
+.feed img {
+  max-width: 100%;
+  display: block;
 }
 
 .field {
