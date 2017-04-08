@@ -146,7 +146,7 @@ h4 {
 }
 
 .people {
-  flex: 0 15em;
+  flex: 0 1 15em;
   background: #f3f3f5;
   padding: 8px;
   display: flex;
@@ -194,5 +194,9 @@ h4 {
 @media (max-width: 640px) {
   .main {
     flex-flow: column;
+  }
+
+  .people {
+    margin-left: 0;
   }
 }

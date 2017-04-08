@@ -249,7 +249,7 @@ class Room {
     this.feed = jd.f(".feed", this.el);
   }
   leave() {
-    jd.f(".main").removeChild(this.el);
+    jd.f(".windows").removeChild(this.el);
     delete this.el;
     delete this.field;
     delete this.input;
