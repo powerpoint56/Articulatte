@@ -154,8 +154,21 @@ h4 {
   margin-left: auto;
 }
 
+.about {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-around;
+  order: 10;
+  padding: 8px;
+  color: gray;
+}
+
+.about a {
+  color: gray;
+}
+
 .rooms {
-  margin: 8px;
+  padding: 8px;
 }
 
 .rooms .message {
