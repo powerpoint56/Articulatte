@@ -73,7 +73,7 @@ h4 {
 .windows {
   display: flex;
   flex: 1;
-  overflow-x: auto;
+  max-width: 100%;
 }
 
 .window {
@@ -81,14 +81,13 @@ h4 {
   flex-flow: column;
   flex: 1;
   border-right: 1px solid #ccc;
+  max-width: 100%;
 }
 
 .feed {
   flex: 1;
   background: #fff;
-  overflow: auto;
   padding: 8px;
-  flex-wrap: wrap;
 }
 
 .feed img {
@@ -139,7 +138,7 @@ h4 {
 }
 
 .m-text {
-
+  
 }
 
 .update {
