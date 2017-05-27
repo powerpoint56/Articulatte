@@ -4,6 +4,7 @@ body, html, .main {
   height: 100%;
   font-family: "PT Sans", sans-serif;
   font-size: 15px;
+  overflow: hidden;
 }
 
 textarea {
@@ -204,6 +205,17 @@ h4 {
   flex: 1;
 }
 
+.minimize-check {
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  display: none;
+  justify-content: center;
+  background-color: #eee;
+  margin: 0;
+}
+
 @media (max-width: 640px) {
   .main {
     flex-flow: column;
@@ -211,5 +223,13 @@ h4 {
 
   .people {
     margin-left: 0;
+  }
+  
+  .minimize-check {
+    display: flex;
+  }
+  
+  .minimize-check:checked ~ .people {
+    display: none;
   }
 }
