@@ -1,3 +1,5 @@
+/* global jd, io, localStorage, location, AudioContext */
+
 (() => {
 
 "use strict";
@@ -61,7 +63,7 @@ User.create = (...args) => {
   const user = new User(...args);
   users[user.id] = user;
   return user;
-}
+};
 let myId;
 
 

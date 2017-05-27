@@ -6,7 +6,7 @@ const http = require("http");
 const nodeStatic = require("node-static");
 const shortid = require("shortid");
 const JsonDB = require("node-json-db");
-const striptags = require("striptags")
+const striptags = require("striptags");
 
 const animalia = require("./animalia.js");
 
@@ -37,7 +37,7 @@ User.create = () => {
   const user = new User();
   users[user.id] = user;
   return user;
-}
+};
 
 
 class Room {
@@ -80,7 +80,7 @@ Room.create = (...args) => {
 Room.delete = room => {
   db.delete(`rooms/${room.id}`);
   delete rooms[room.id];
-}
+};
 Room.all = () => {
   let data = [];
   for (let x in rooms) {
