@@ -55,6 +55,10 @@ h4 {
   margin: 0;
 }
 
+a {
+  word-break: break-all;
+}
+
 .error {
   color: red;
 }
@@ -87,11 +91,11 @@ h4 {
 }
 
 .feed {
-  flex: 1;
+  flex: 1 0 auto;
   background: #fff;
   padding: 8px;
-  word-break: break-all;
-  overflow-y: auto;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .feed img {
@@ -140,10 +144,6 @@ h4 {
   font-size: 13px;
   color: #929294;
   margin-left: 6px;
-}
-
-.m-text {
-  
 }
 
 .update {
@@ -212,14 +212,15 @@ h4 {
 
 .minimize-check {
   cursor: pointer;
-  -webkit-appearance: none;
-  -moz-appearance: none;
   appearance: none;
   display: none;
   justify-content: center;
   background-color: #eee;
   margin: 0;
   color: #ccc;
+}
+
+.minimize-check:focus {
   outline: none;
 }
 
