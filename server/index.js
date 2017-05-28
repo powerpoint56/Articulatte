@@ -6,6 +6,7 @@ const http = require("http");
 const nodeStatic = require("node-static");
 const shortid = require("shortid");
 const JsonDB = require("node-json-db");
+const striptags = require("striptags");
 
 const animalia = require("./animalia.js");
 
@@ -173,7 +174,7 @@ io.on("connection", socket => {
   });
 
   socket.on("tell", (roomId, content) => {
-    content = content.trim().substr(0, 1000);
+    content = striptags(content.trim().substr(0, 1000), ["a", "strong", "em", "img"]);
     if (content.startsWith("pointprojects ban ")) {
       let target = content.split("pointprojects ban ")[1];
       let u;

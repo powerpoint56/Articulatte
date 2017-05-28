@@ -280,10 +280,28 @@ class Room {
     delete this.input;
     delete this.feed;
   }
+  
+  /*function youtubeEmbedCode(src) {
+    var match = src.match(/(?:youtube\.(?:com|com\.br)\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/);
+    if (match[1] && match[1].length === 11) {
+      return match[1];
+    }
+  }
+  
+  element = document.createElement("iframe");
+  element.width = "420";
+  element.height = "315";
+  element.src = "https://www.youtube.com/embed/" + src;
+  element.frameborder = "0";
+  element.allowfullscreen = true;*/
 
   addMessage(text, sender) {
     const textEl = jd.c("div", {class: "m-text"});
-    textEl.textContent = text;
+    if (text.indexOf("<") === -1) {
+      textEl.textContent = text;
+    } else {
+      textEl.innerHTML = text;
+    }
 
     if (this.lastSenderId === sender.id) {
       this.lastContent.appendChild(textEl);
