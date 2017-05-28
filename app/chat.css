@@ -235,6 +235,10 @@ a {
   color: gray;
 }
 
+.mute:focus {
+  outline: none;
+}
+
 .names {
   order: 1;
 }
