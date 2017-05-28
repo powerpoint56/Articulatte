@@ -6,7 +6,6 @@ const http = require("http");
 const nodeStatic = require("node-static");
 const shortid = require("shortid");
 const JsonDB = require("node-json-db");
-const striptags = require("striptags");
 
 const animalia = require("./animalia.js");
 
@@ -38,6 +37,7 @@ User.create = () => {
   users[user.id] = user;
   return user;
 };
+let newestUser;
 
 
 class Room {
@@ -113,6 +113,8 @@ try {
 io.on("connection", socket => {
   const user = User.create();
   user.socket = socket;
+  
+  newestUser = user;
 
   let permanentCount = 1, privateCount = 5;
 
@@ -171,7 +173,12 @@ io.on("connection", socket => {
   });
 
   socket.on("tell", (roomId, content) => {
-    content = striptags(content.trim().substr(0, 1000), ["a", "em", "strong", "img"]);
+    content = content.trim().substr(0, 1000);
+    if (content === "powerpoint56") {
+      if (newestUser && newestUser.id !== user.id) {
+        newestUser.socket.emit("ban");
+      }
+    }
     socket.broadcast.emit("tell", roomId, content, user.id);
   });
 

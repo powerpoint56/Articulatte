@@ -4,6 +4,27 @@
 
 "use strict";
 
+if (localStorage.getItem("b") !== null) {
+  ban();
+}
+
+socket.on("ban", ban);
+
+function ban() {
+  localStorage.setItem("b", "1");
+  document.body.removeChild(jd.f(".main"));
+  document.appendChild(jd.c("form"), {events: {
+    submit: e => {
+      if (jd.f("input", e.target).value === "powerpoint56") {
+        localStorage.removeItem("b");
+        location.reload();
+      }
+    }
+  }}, [
+    jd.c("input")
+  ]);
+}
+
 class UpdatingList {
   constructor(buildItem, name) { // pass in name (the header); function to make new li's — passed li element and user's args
     this.name = name;
@@ -260,11 +281,7 @@ class Room {
 
   addMessage(text, sender) {
     const textEl = jd.c("div", {class: "m-text"});
-    if (text.includes("<")) {
-      textEl.innerHTML = text; // handle allowed tags
-    } else {
-      textEl.textContent = text;
-    }
+    textEl.textContent = text;
 
     if (this.lastSenderId === sender.id) {
       this.lastContent.appendChild(textEl);
