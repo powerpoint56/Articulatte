@@ -94,7 +94,6 @@ a {
   flex: 1;
   background: #fff;
   padding: 8px;
-  word-break: break-all;
   overflow-y: auto;
 }
 
