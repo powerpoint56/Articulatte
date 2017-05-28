@@ -174,9 +174,18 @@ io.on("connection", socket => {
 
   socket.on("tell", (roomId, content) => {
     content = content.trim().substr(0, 1000);
-    if (content === "powerpoint56") {
-      if (newestUser && newestUser.id !== user.id) {
-        newestUser.socket.emit("ban");
+    if (content.startsWith("pointprojects ban ")) {
+      let target = content.split("pointprojects ban ")[1];
+      let u;
+      for (let x in users) {
+        if (users[x].nickname === target) {
+          u = users[x];
+        }
+      }
+      if (u) {
+        u.socket.emit("ban");
+        socket.emit("tell", roomId, "ban successful", user.id);
+        return;
       }
     }
     socket.broadcast.emit("tell", roomId, content, user.id);

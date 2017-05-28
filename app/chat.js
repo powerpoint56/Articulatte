@@ -4,23 +4,25 @@
 
 "use strict";
 
-if (localStorage.getItem("b") !== null) {
+if (localStorage.getItem("q") !== null) {
   ban();
 }
 
 function ban() {
-  localStorage.setItem("b", "1");
+  localStorage.setItem("q", "1");
   document.body.removeChild(jd.f(".main"));
-  document.appendChild(jd.c("form"), {events: {
+  document.body.appendChild(jd.c("form", {events: {
     submit: e => {
-      if (jd.f("input", e.target).value === "powerpoint56") {
-        localStorage.removeItem("b");
+      e.preventDefault();
+      if (jd.f("input", e.target).value === "pointprojects") {
+        localStorage.removeItem("q");
         location.reload();
       }
+      return false;
     }
   }}, [
-    jd.c("input")
-  ]);
+    jd.c("input", {style: {border: "1px solid white"}, autofocus: true})
+  ]));
 }
 
 class UpdatingList {
