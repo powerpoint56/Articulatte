@@ -147,10 +147,6 @@ a {
   margin-left: 6px;
 }
 
-.m-text {
-  
-}
-
 .update {
   color: #929294;
   margin: 4px;
@@ -169,9 +165,9 @@ a {
   margin-top: auto;
   display: flex;
   justify-content: space-around;
-  order: 10;
-  padding: 8px;
+  padding: 4px;
   color: gray;
+  order: 3;
 }
 
 .about a {
@@ -180,10 +176,7 @@ a {
 
 .rooms {
   padding: 8px;
-}
-
-.rooms .message {
-  order: -10;
+  order: 0;
 }
 
 .updating-list {
@@ -225,7 +218,25 @@ a {
   background-color: #eee;
   margin: 0;
   color: #ccc;
+}
+
+.minimize-check:focus {
   outline: none;
+}
+
+.mute {
+  appearance: none;
+  color: black;
+  order: 2;
+  margin: 8px;
+}
+
+.mute:checked {
+  color: gray;
+}
+
+.names {
+  order: 1;
 }
 
 @media (max-width: 640px) {

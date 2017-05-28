@@ -135,7 +135,7 @@ socket.on("login", (id, nickname) => {
         }}})
       ])
     ])
-  ], jd.f(".people"));
+  ], jd.f(".names", ".people"));
 });
 
 
@@ -303,13 +303,14 @@ class Room {
       textEl.innerHTML = text;
     }
 
-    if (this.lastSenderId === sender.id) {
+    let time = getTime();
+    if (this.lastSenderId === sender.id && this.lastTime === time) {
       this.lastContent.appendChild(textEl);
     } else {
       this.lastContent = jd.c("div", {class: "m-content"}, [
         jd.c("div", {class: "m-header"}, [
           sender.createLabel(),
-          jd.c("span", {class: "m-time", _: getTime()})
+          jd.c("span", {class: "m-time", _: time})
         ]),
         textEl
       ]);
@@ -319,6 +320,7 @@ class Room {
       ], this.feed);
     }
     this.lastSenderId = sender.id;
+    this.lastTime = time;
 
     this.scroll();
     Notify.beep();
@@ -331,7 +333,9 @@ class Room {
     this.lastSenderId = -1;
   }
   scroll() {
-    this.feed.scrollTop = this.feed.scrollHeight;
+    if (this.feed.scrollHeight - (this.feed.scrollTop + this.feed.clientHeight) < this.feed.clientHeight / 2) {
+      this.feed.scrollTop = this.feed.scrollHeight;
+    }
   }
   get creator() {
     return users[this.creatorId];
@@ -416,7 +420,7 @@ const Notify = (() => {
 
   return {
     beep: () => {
-      if (tabActive || !context) return;
+      if (tabActive || !context || jd.f(".mute").checked) return;
 
       const osc = context.createOscillator();
       const gain = context.createGain();
