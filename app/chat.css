@@ -94,8 +94,7 @@ a {
   flex: 1;
   background: #fff;
   padding: 8px;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+  word-break: break-all;
   overflow-y: auto;
 }
 
@@ -123,6 +122,8 @@ a {
   font-size: 100%;
   margin: 8px;
   display: flex;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .m-icon {
