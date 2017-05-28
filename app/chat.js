@@ -8,8 +8,6 @@ if (localStorage.getItem("b") !== null) {
   ban();
 }
 
-socket.on("ban", ban);
-
 function ban() {
   localStorage.setItem("b", "1");
   document.body.removeChild(jd.f(".main"));
@@ -89,6 +87,8 @@ let myId;
 
 
 const socket = io();
+
+socket.on("ban", ban);
 
 const nicknameForm = jd.f(".nickname", ".main");
 
