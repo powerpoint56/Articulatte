@@ -248,7 +248,21 @@ class Room {
       ]),
       jd.c("div", {class: "feed"}),
       jd.c("form", {class: "field"}, [
-        jd.c("input", {class: "f-input", maxlength: 1000, tabindex: 1}),
+        jd.c("textarea", {class: "f-input", maxlength: 1000, tabindex: 1, rows: 1, events: {"keypress": e => {
+          if (!e.shiftKey && e.keyCode === 13) {
+            e.preventDefault();
+
+            let message = processUris(this.input.value.trim().substr(0, 1000));
+            if (Date.now() - lastMessage < 100 || !message.length)  return;
+            lastMessage = Date.now();
+      
+            socket.emit("tell", this.id, message);
+            this.field.reset();
+            this.addMessage(message, users[myId]);
+      
+            return false;
+          }
+        }}}),
         jd.c("button", {class: "f-submit fa fa-reply"})
       ])
     ], jd.f(".windows"));
@@ -256,20 +270,6 @@ class Room {
     this.field = jd.f(".field", this.el);
     this.input = jd.f(".f-input", this.field);
     this.input.focus();
-
-    this.field.addEventListener("submit", e => {
-      e.preventDefault();
-
-      let message = processUris(this.input.value.trim().substr(0, 1000));
-      if (Date.now() - lastMessage < 100 || !message.length)  return;
-      lastMessage = Date.now();
-
-      socket.emit("tell", this.id, message);
-      e.target.reset();
-      this.addMessage(message, users[myId]);
-
-      return false;
-    });
 
     this.feed = jd.f(".feed", this.el);
   }

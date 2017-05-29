@@ -109,7 +109,7 @@ a {
 }
 
 .f-input {
-  flex: 1 0;
+  flex: 1 0 auto;
   max-width: 100%;
 }
 
@@ -145,6 +145,10 @@ a {
   font-size: 13px;
   color: #929294;
   margin-left: 6px;
+}
+
+.m-text {
+  white-space: pre;
 }
 
 .update {
