@@ -148,7 +148,7 @@ a {
 }
 
 .m-text {
-  white-space: pre;
+  white-space: pre-wrap;
 }
 
 .update {
