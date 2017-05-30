@@ -38,7 +38,7 @@ gulp.task("css", () => {
 });
 
 gulp.task("etal", () => {
-    gulp.src([src + "/default.jpg", src + "/fav.ico"])
+    gulp.src([src + "/*.jpg", src + "/*.ico"])
         .pipe(gulp.dest(dest));
 });
 

@@ -323,7 +323,7 @@ class Room {
     this.lastTime = time;
 
     this.scroll();
-    Notify.beep();
+    Notify.notify();
   }
   addUpdate(text, sender) {
     jd.c("div", {class: "update", _: text, style: (sender ? {color: sender.hsl} : null)}, [
@@ -410,32 +410,52 @@ socket.on("roomInvalid", (name, reason) => {
 const Notify = (() => {
   let tabActive = true;
   window.addEventListener("focus", () => {
-      tabActive = true;
+    tabActive = true;
+    changeFavicon("fav.ico");
   });
   window.addEventListener("blur", () => {
-      tabActive = false;
+    tabActive = false;
   });
 
   const context = AudioContext ? new AudioContext() : null;
+  
+  function beep() {
+    if (!context) return;
+    const osc = context.createOscillator();
+    const gain = context.createGain();
+    osc.connect(gain);
+    osc.frequency.value = 587.33;
+
+    gain.gain.setValueAtTime(0, context.currentTime);
+    gain.gain.linearRampToValueAtTime(0.8, context.currentTime + 0.1);
+    gain.gain.linearRampToValueAtTime(0, context.currentTime + 0.7);
+    gain.connect(context.destination);
+
+    osc.start();
+    osc.stop(context.currentTime + 0.8);
+  }
 
   return {
-    beep: () => {
-      if (tabActive || !context || jd.f(".mute").checked) return;
-
-      const osc = context.createOscillator();
-      const gain = context.createGain();
-      osc.connect(gain);
-      osc.frequency.value = 587.33;
-
-      gain.gain.setValueAtTime(0, context.currentTime);
-      gain.gain.linearRampToValueAtTime(0.8, context.currentTime + 0.1);
-      gain.gain.linearRampToValueAtTime(0, context.currentTime + 0.7);
-      gain.connect(context.destination);
-
-      osc.start();
-      osc.stop(context.currentTime + 0.8);
+    notify: () => {
+      if (!tabActive) {
+        changeFavicon("update.ico");
+        beep();
+      }
     }
   };
 })();
+
+function changeFavicon(src) { // https://gist.github.com/mathiasbynens/428626
+console.log(src);
+  let link = document.createElement("link"),
+  oldLink = document.getElementById("dynamic-favicon");
+  link.id = "dynamic-favicon";
+  link.rel = "shortcut icon";
+  link.href = src;
+  if (oldLink) {
+    document.head.removeChild(oldLink);
+  }
+  document.head.appendChild(link);
+}
 
 })();
