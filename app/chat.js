@@ -190,7 +190,28 @@ socket.on("join", (roomId, roomCode, arr) => {
 });
 
 socket.on("tell", (roomId, content, userId) => {
-  rooms[roomId].addMessage(content, users[userId]);
+  const user = users[userId];
+  rooms[roomId].addMessage(content, user);
+  if (user.typingIndicator) {
+    user.typingIndicator.classList.add("hide");
+  }
+});
+
+socket.on("typing", (roomId, userId) => {
+  const user = users[userId];
+  if (!user.typingIndicator) {
+    user.typingIndicator = user.createIcon();
+    rooms[roomId].typing.appendChild(user.typingIndicator);
+  } else {
+    user.typingIndicator.classList.remove("hide");
+  }
+});
+
+socket.on("not typing", (roomId, userId) => {
+  const user = users[userId];
+  if (user.typingIndicator) {
+    user.typingIndicator.classList.add("hide");
+  }
 });
 
 socket.on("+member", (roomId, userId, nickname) => {
@@ -253,33 +274,40 @@ class Room {
         }}})
       ]),
       jd.c("div", {class: "feed"}),
+      jd.c("div", {class: "typing"}),
       jd.c("form", {class: "field"}, [
-        jd.c("textarea", {class: "f-input", maxlength: 1000, tabindex: 1, rows: 1, events: {"keypress": e => {
-          if (!e.shiftKey && e.keyCode === 13) {
-            e.preventDefault();
-
-            let message = processUris(this.input.value.trim().substr(0, 1000));
-            if (Date.now() - lastMessage < 100 || !message.length)  return;
-            lastMessage = Date.now();
-      
-            socket.emit("tell", this.id, message);
-            this.field.reset();
-            this.addMessage(message, users[myId]);
-      
-            return false;
-          } else {
-            //typing = 
-          }
-        }}}),
+        jd.c("textarea", {class: "f-input", maxlength: 1000, tabindex: 1, rows: 1}),
         jd.c("button", {class: "f-submit fa fa-reply"})
       ])
     ], jd.f(".windows"));
 
     this.field = jd.f(".field", this.el);
     this.input = jd.f(".f-input", this.field);
+    this.input.addEventListener("keydown", e => {
+      if (!e.shiftKey && e.keyCode === 13) {
+        e.preventDefault();
+
+        let message = processUris(this.input.value.trim().substr(0, 1000));
+        if (Date.now() - lastMessage < 100 || !message.length)  return;
+        lastMessage = Date.now();
+  
+        socket.emit("tell", this.id, message);
+        this.field.reset();
+        this.addMessage(message, users[myId]);
+  
+        return false;
+      } else {
+        socket.emit("typing", this.id);
+        clearTimeout(this.typeTimeoutId);
+        this.typeTimeoutId = setTimeout(() => {
+          socket.emit("not typing", this.id);
+        }, 3000);
+      }
+    });
     this.input.focus();
 
     this.feed = jd.f(".feed", this.el);
+    this.typing = jd.f(".typing", this.el);
   }
   leave() {
     jd.f(".windows").removeChild(this.el);

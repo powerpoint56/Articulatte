@@ -265,3 +265,11 @@ a {
     display: none;
   }
 }
+
+.typing {
+  padding: 8px;
+  background-color: #f9f9fb;
+  height: 24px;
+  overflow: hidden;
+  flex: 0 0 auto;
+}

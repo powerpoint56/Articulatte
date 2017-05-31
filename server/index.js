@@ -38,8 +38,6 @@ User.create = () => {
   users[user.id] = user;
   return user;
 };
-let newestUser;
-
 
 class Room {
   constructor(name, settings = {isPrivate: false, isPermanent: false, creatorId: -1}) {
@@ -114,8 +112,6 @@ try {
 io.on("connection", socket => {
   const user = User.create();
   user.socket = socket;
-  
-  newestUser = user;
 
   let permanentCount = 1, privateCount = 5;
 
@@ -185,11 +181,19 @@ io.on("connection", socket => {
       }
       if (u) {
         u.socket.emit("ban");
-        socket.emit("tell", roomId, "ban successful", user.id);
+        socket.in(roomId).emit("tell", roomId, "ban successful", user.id);
         return;
       }
     }
-    socket.broadcast.emit("tell", roomId, content, user.id);
+    socket.broadcast.in(roomId).emit("tell", roomId, content, user.id);
+  });
+  
+  socket.on("typing", roomId => {
+    socket.to(roomId).emit("typing", roomId, user.id);
+  });
+  
+  socket.on("not typing", roomId => {
+    socket.to(roomId).emit("not typing", roomId, user.id);
   });
 
   socket.on("leave", roomId => {
