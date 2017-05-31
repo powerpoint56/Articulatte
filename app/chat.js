@@ -71,7 +71,13 @@ class User {
     }
 
     this.hueRotate = id * 65;
-    this.hsl = `hsl(${210 + this.hueRotate}, 75%, 50%)`;
+    if (this.nickname === "jweiss") {
+      this.hsl = "#385E0F";
+    } else if (this.nickname === "Topher") {
+      this.hsl = "#B22222";
+    } else {
+      this.hsl = `hsl(${210 + this.hueRotate}, 75%, 50%)`;
+    }
   }
   createIcon() {
     return jd.c("img", {class: "m-icon", style: {filter: `hue-rotate(${this.hueRotate}deg)`}});
@@ -261,6 +267,8 @@ class Room {
             this.addMessage(message, users[myId]);
       
             return false;
+          } else {
+            //typing = 
           }
         }}}),
         jd.c("button", {class: "f-submit fa fa-reply"})
@@ -446,11 +454,10 @@ const Notify = (() => {
 })();
 
 function changeFavicon(src) { // https://gist.github.com/mathiasbynens/428626
-console.log(src);
   let link = document.createElement("link"),
   oldLink = document.getElementById("dynamic-favicon");
   link.id = "dynamic-favicon";
-  link.rel = "shortcut icon";
+  link.rel = "icon";
   link.href = src;
   if (oldLink) {
     document.head.removeChild(oldLink);

@@ -230,13 +230,14 @@ a {
 
 .mute {
   appearance: none;
-  color: black;
+  color: #444;
   order: 2;
   margin: 8px;
+  font-size: 18px;
 }
 
 .mute:checked {
-  color: gray;
+  color: #999;
 }
 
 .mute:focus {
