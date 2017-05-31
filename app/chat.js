@@ -70,14 +70,14 @@ class User {
       this.displayName += " (me)";
     }
 
-    this.hueRotate = id * 65;
     if (this.nickname === "jweiss") {
-      this.hsl = "#385E0F";
+      this.hueRotate = -100;
     } else if (this.nickname === "Topher") {
-      this.hsl = "#B22222";
+      this.hueRotate = -220;
     } else {
-      this.hsl = `hsl(${210 + this.hueRotate}, 75%, 50%)`;
+      this.hueRotate = id * 65;
     }
+    this.hsl = `hsl(${210 + this.hueRotate}, 75%, 50%)`;
   }
   createIcon() {
     return jd.c("img", {class: "m-icon", style: {filter: `hue-rotate(${this.hueRotate}deg)`}});
