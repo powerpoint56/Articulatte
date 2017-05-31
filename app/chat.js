@@ -220,7 +220,9 @@ socket.on("+member", (roomId, userId, nickname) => {
 });
 
 socket.on("-member", (roomId, userId) => {
-  rooms[roomId].addUpdate(`${users[userId].nickname} has left the room`, users[userId]);
+  const user = users[userId], room = rooms[roomId];
+  room.addUpdate(`${user.nickname} has left the room`, user);
+  room.typing.removeChild(user.typingIndicator);
 });
 
 socket.on("left", roomId => {

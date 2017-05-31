@@ -214,8 +214,6 @@ a {
 
 .minimize-check {
   cursor: pointer;
-  -webkit-appearance: none;
-  -moz-appearance: none;
   appearance: none;
   display: none;
   justify-content: center;
