@@ -238,12 +238,20 @@ function getTime() {
 }
 let lastMessage = 0;
 
-const urlRegex = /((http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?)/g;
-const imgRegex = /\.(jpe?g|png|gif)$/g;
+const urlRegex = /((http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?)/gi;
+const imgRegex = /\.(jpe?g|png|gif)$/gi;
+const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i;
+
 function processUris(text) {
-  return text.replace(urlRegex, match =>
-    `<a href="${match}">${imgRegex.test(match) ? `<img src=${match}>` : match}</a>`
-  );
+  return text.replace(urlRegex, url => {
+    let ytId = url.match(youtubeRegex);
+    console.log(ytId);
+    if (ytId && ytId[1] && ytId[1].length === 11) {
+      return `<iframe width=420 height=315 src="https://www.youtube.com/embed/${ytId[1]}" frameborder=0 allowfullscreen></iframe>`;
+    } else {
+      return `<a href="${url}">${imgRegex.test(url) ? `<img src=${url}>` : url}</a>`;
+    }
+  });
 }
 
 function loopTextNodes(node, func) {
@@ -331,28 +339,14 @@ class Room {
     delete this.input;
     delete this.feed;
   }
-  
-  /*function youtubeEmbedCode(src) {
-    var match = src.match(/(?:youtube\.(?:com|com\.br)\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/);
-    if (match[1] && match[1].length === 11) {
-      return match[1];
-    }
-  }
-  
-  element = document.createElement("iframe");
-  element.width = "420";
-  element.height = "315";
-  element.src = "https://www.youtube.com/embed/" + src;
-  element.frameborder = "0";
-  element.allowfullscreen = true;*/
 
   addMessage(text, sender) {
     const textEl = jd.c("div", {class: "m-text"});
-    if (text.indexOf("<") === -1) {
+    if (text.indexOf("/") === -1) {
       textEl.textContent = text;
     } else {
       textEl.innerHTML = text;
-      loopTextNodes(this.input, textNode => {
+      loopTextNodes(textEl, textNode => {
         let parent = textNode.parentNode;
         if (!parent.src && !parent.href) {
           parent.innerHTML = processUris(parent.innerHTML);

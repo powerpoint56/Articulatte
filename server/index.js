@@ -170,7 +170,7 @@ io.on("connection", socket => {
   });
 
   socket.on("tell", (roomId, content) => {
-    content = striptags(content.trim().substr(0, 2000), ["a", "img", "b", "i", "u", "span", "div"]);
+    content = striptags(content.trim().substr(0, 2000), ["a", "img", "b", "i", "u", "span", "div", "iframe"]);
     if (content.startsWith("pointprojects ban ")) {
       let target = content.split("pointprojects ban ")[1];
       let u;
