@@ -246,6 +246,16 @@ function processUris(text) {
   );
 }
 
+function loopTextNodes(node, func) {
+  if (node.nodeType === 3) {
+    func(node);
+  } else {
+    for (let child of node.childNodes) {
+      loopTextNodes(child, func);
+    }
+  }
+}
+
 class Room {
   constructor(id, name, settings) {
     this.name = name;
@@ -277,8 +287,8 @@ class Room {
       ]),
       jd.c("div", {class: "feed"}),
       jd.c("div", {class: "typing"}),
-      jd.c("form", {class: "field"}, [
-        jd.c("textarea", {class: "f-input", maxlength: 1000, tabindex: 1, rows: 1}),
+      jd.c("div", {class: "field"}, [
+        jd.c("div", {class: "f-input", tabindex: 1, contenteditable: true}),
         jd.c("button", {class: "f-submit fa fa-reply"})
       ])
     ], jd.f(".windows"));
@@ -289,16 +299,25 @@ class Room {
       if (!e.shiftKey && e.keyCode === 13) {
         e.preventDefault();
 
-        let message = processUris(this.input.value.trim().substr(0, 1000));
+        loopTextNodes(this.input, textNode => {
+          let parent = textNode.parentNode;
+          if (!parent.src && !parent.href) {
+            parent.innerHTML = processUris(parent.innerHTML);
+          }
+        });
+        let message = this.input.innerHTML.trim().substr(0, 2000);
         if (Date.now() - lastMessage < 100 || !message.length)  return;
         lastMessage = Date.now();
   
         socket.emit("tell", this.id, message);
-        this.field.reset();
+        this.input.textContent = "";
         this.addMessage(message, users[myId]);
   
         return false;
       } else {
+        if (this.input.innerHTML.length > 2000) {
+          this.input.innerHTML = this.input.innerHTML.substring(0, 2000);
+        }
         socket.emit("typing", this.id);
         clearTimeout(this.typeTimeoutId);
         this.typeTimeoutId = setTimeout(() => {

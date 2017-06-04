@@ -7,13 +7,6 @@ body, html, .main {
   overflow: hidden;
 }
 
-textarea {
-  padding: 4px;
-  font-size: 100%;
-  font-family: inherit;
-  border: 0;
-}
-
 button {
   color: #828282;
   background: none;
@@ -97,7 +90,7 @@ a {
   overflow-y: auto;
 }
 
-.feed img {
+.feed img , .f-input img {
   max-width: 100%;
   display: block;
 }
@@ -110,7 +103,11 @@ a {
 
 .f-input {
   flex: 1 0 auto;
-  max-width: 100%;
+  padding: 4px;
+  border: 1px solid #ccc;
+  background: white;
+  min-height: 1em;
+  white-space: pre-wrap;
 }
 
 .f-reply {
@@ -217,7 +214,7 @@ a {
   appearance: none;
   display: none;
   justify-content: center;
-  background-color: #eee;
+  background: #eee;
   margin: 0;
   color: #ccc;
 }
@@ -266,7 +263,7 @@ a {
 
 .typing {
   padding: 8px;
-  background-color: #f9f9fb;
+  background: #f9f9fb;
   height: 24px;
   overflow: hidden;
   flex: 0 0 auto;
