@@ -86,7 +86,7 @@ a {
 .feed {
   flex: 1;
   background: #fff;
-  padding: 8px;
+  padding: 8px 8px 4px 8px;
   overflow-y: auto;
 }
 
@@ -209,9 +209,8 @@ a {
   flex: 1;
 }
 
-.minimize-check {
+.minimize {
   cursor: pointer;
-  appearance: none;
   display: none;
   justify-content: center;
   background: #eee;
@@ -219,8 +218,8 @@ a {
   color: #ccc;
 }
 
-.minimize-check:focus {
-  outline: none;
+#minimize-check {
+  display: none;
 }
 
 .mute {
@@ -231,12 +230,8 @@ a {
   font-size: 18px;
 }
 
-.mute:checked {
+#mute-check:checked ~ .mute {
   color: #999;
-}
-
-.mute:focus {
-  outline: none;
 }
 
 .names {
@@ -252,11 +247,11 @@ a {
     margin-left: 0;
   }
   
-  .minimize-check {
+  .minimize {
     display: flex;
   }
   
-  .minimize-check:checked ~ .people {
+  #minimize-check:checked ~ .people {
     display: none;
   }
 }
@@ -267,4 +262,5 @@ a {
   height: 24px;
   overflow: hidden;
   flex: 0 0 auto;
+  filter: opacity(50%);
 }

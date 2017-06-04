@@ -299,12 +299,6 @@ class Room {
       if (!e.shiftKey && e.keyCode === 13) {
         e.preventDefault();
 
-        loopTextNodes(this.input, textNode => {
-          let parent = textNode.parentNode;
-          if (!parent.src && !parent.href) {
-            parent.innerHTML = processUris(parent.innerHTML);
-          }
-        });
         let message = this.input.innerHTML.trim().substr(0, 2000);
         if (Date.now() - lastMessage < 100 || !message.length)  return;
         lastMessage = Date.now();
@@ -358,6 +352,12 @@ class Room {
       textEl.textContent = text;
     } else {
       textEl.innerHTML = text;
+      loopTextNodes(this.input, textNode => {
+        let parent = textNode.parentNode;
+        if (!parent.src && !parent.href) {
+          parent.innerHTML = processUris(parent.innerHTML);
+        }
+      });
     }
 
     let time = getTime();
