@@ -245,7 +245,6 @@ const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]
 function processUris(text) {
   return text.replace(urlRegex, url => {
     let ytId = url.match(youtubeRegex);
-    console.log(ytId);
     if (ytId && ytId[1] && ytId[1].length === 11) {
       return `<iframe width=420 height=315 src="https://www.youtube.com/embed/${ytId[1]}" frameborder=0 allowfullscreen></iframe>`;
     } else {
@@ -342,7 +341,7 @@ class Room {
 
   addMessage(text, sender) {
     const textEl = jd.c("div", {class: "m-text"});
-    if (text.indexOf("/") === -1) {
+    if (!text.includes("/") && !text.includes("&") && !text.includes("<")) {
       textEl.textContent = text;
     } else {
       textEl.innerHTML = text;
