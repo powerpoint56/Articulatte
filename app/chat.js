@@ -274,18 +274,36 @@ class Room {
 
   setUpWindow() {
     this.el = jd.c("div", {class: "window"}, [
-      jd.c("header", null, [
-        jd.c("span", null, [
+      jd.c("div", {class: "header"}, [
+        jd.c("span", 0, [
           jd.c("button", jd.c("a", {
             class: "fa fa-link",
             href: this.link,
             tabindex: 2
           })),
-          jd.c("button", jd.c("a", {
+          jd.c("button", {
             class: "fa fa-envelope",
-            href: `mailto:?subject=Articulatte%20room%20invite&body=Join%20here!%20${this.link}`,
-            tabindex: 2
-          }))
+            tabindex: 2,
+            events: {
+              click: e => {
+                const emailForm = e.target.nextElementSibling.querySelector("form");
+                emailForm.classList.toggle("fade");
+                emailForm.focus();
+              }
+            }
+          }),
+          jd.c("span", {style: "position: relative;"}, [
+            jd.c("form", {class: "fade fadeable email", events: {"submit": e => {
+              e.preventDefault();
+              socket.emit("email", jd.f("input", e.target).value, this.id);
+              e.target.classList.toggle("fade");
+              e.target.reset();
+              return false;
+            }}}, [
+              jd.c("input", {type: "email", placeholder: "Email Address"}),
+              jd.c("button", {class: "fa fa-arrow-right"})
+            ])
+          ]),
         ]),
         jd.c("span", {_: this.name, style: (this.creator ? {color: this.creator.hsl} : null)}),
         jd.c("button", {class: "fa fa-times", events: {click: e => {
@@ -313,16 +331,22 @@ class Room {
         socket.emit("tell", this.id, message);
         this.input.textContent = "";
         this.addMessage(message, users[myId]);
+        
+        //socket.emit("not typing", this.id);
   
         return false;
       } else {
         if (this.input.innerHTML.length > 2000) {
           this.input.innerHTML = this.input.innerHTML.substring(0, 2000);
         }
-        socket.emit("typing", this.id);
+        if (this.typeTimeoutId === undefined) {
+          socket.emit("typing", this.id);
+        }
+        
         clearTimeout(this.typeTimeoutId);
         this.typeTimeoutId = setTimeout(() => {
           socket.emit("not typing", this.id);
+          this.typeTimeoutId = undefined;
         }, 3000);
       }
     });
@@ -496,15 +520,12 @@ const Notify = (() => {
 })();
 
 function changeFavicon(src) { // https://gist.github.com/mathiasbynens/428626
-  let link = document.createElement("link"),
-  oldLink = document.getElementById("dynamic-favicon");
-  link.id = "dynamic-favicon";
-  link.rel = "icon";
-  link.href = src;
+  let oldLink = jd.f("#dynamic-favicon");
   if (oldLink) {
     document.head.removeChild(oldLink);
   }
-  document.head.appendChild(link);
+  
+  jd.c("link", {id: "dynamic-favicon", rel: "shortcut icon", href: src}, 0, document.head);
 }
 
 })();

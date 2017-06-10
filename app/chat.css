@@ -23,20 +23,6 @@ button:hover, button:active {
   background: #f6f6f8;
 }
 
-header {
-  background: #e6e6e8;
-  padding: 8px;
-  cursor: default;
-  font-size: 18px;
-  display: flex;
-  justify-content: space-between;
-}
-
-header a {
-  color: inherit;
-  text-decoration: none;
-}
-
 input {
   font-size: 100%;
   font-family: inherit;
@@ -58,6 +44,14 @@ a {
 
 .hide {
   display: none;
+}
+
+.fadeable {
+  transition: .3s opacity;
+}
+
+.fade {
+  opacity: 0;
 }
 
 
@@ -82,6 +76,44 @@ a {
   max-width: 100%;
   overflow-x: auto;
 }
+
+.header {
+  background: #e6e6e8;
+  padding: 8px;
+  cursor: default;
+  font-size: 18px;
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+
+.header a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.email {
+  display: inline-block;
+  top: 0;
+  bottom: 0;
+  position: absolute;
+  margin: auto 8px;
+}
+
+.email input {
+  font-size: 80%;
+  height: 1em;
+  margin: auto;
+  top: 0;
+  bottom: 0;
+}
+
+.email button {
+  right: 0;
+  display: inline-block;
+  position: absolute;
+}
+
 
 .feed {
   flex: 1;

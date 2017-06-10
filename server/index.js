@@ -3,14 +3,15 @@
 const isProduction = process.argv[2] === "prod";
 
 const http = require("http");
+const fs = require("fs");
+
 const nodeStatic = require("node-static");
 const shortid = require("shortid");
-const JsonDB = require("node-json-db");
 const striptags = require("striptags");
+const nodemailer = require("nodemailer");
 
 const animalia = require("./animalia.js");
 
-const db = new JsonDB("state", true);
 Set.prototype.toJSON = function toJSON() {
   return [...Set.prototype.values.call(this)];
 };
@@ -22,6 +23,17 @@ let server = http.createServer((req, res) => {
         file.serve(req, res);
     }).resume();
 }).listen(process.env.PORT || 3000);
+
+const transporter = nodemailer.createTransport({
+    pool: true,
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: "articulatteapp@gmail.com",
+      pass: fs.readFileSync("emailauth.txt", "utf-8")
+    }
+});
 
 const io = require("socket.io")(server);
 
@@ -71,13 +83,13 @@ Room.id = 0;
 Room.create = (...args) => {
   const room = new Room(...args);
   rooms[room.id] = room;
-  if (!room.isHome) {
+  /*if (!room.isHome) {
     db.push(`/rooms/${room.id}`, room);
-  }
+  }*/
   return room;
 };
 Room.delete = room => {
-  db.delete(`rooms/${room.id}`);
+  /*db.delete(`rooms/${room.id}`);*/
   delete rooms[room.id];
 };
 Room.all = () => {
@@ -90,7 +102,7 @@ Room.all = () => {
 
 const Home = Room.create("Home", {isPermanent: true, isHome: true});
 
-try {
+/*try {
   const data = db.getData("/rooms");
   for (let id in data) {
     const roomData = data[id];
@@ -106,7 +118,7 @@ try {
   }
 } catch (err) {
 
-}
+}*/
 
 
 io.on("connection", socket => {
@@ -149,7 +161,7 @@ io.on("connection", socket => {
   }
 
   socket.on("login", (nickname, roomCode) => {
-    nickname = nickname.trim().substr(0, 20) || `anonymous ${animalia.random()}`; // mult' animalia!!
+    nickname = nickname.trim().substr(0, 20) || `anonymous ${animalia.random()}`; // mult" animalia!!
 
     if (nickname.length <= 2) {
       return socket.emit("nickInvalid", nickname, "too short");
@@ -254,5 +266,17 @@ io.on("connection", socket => {
 
   socket.on("join", id => {
     joinRoom(rooms[id]);
+  });
+  
+  socket.on("email", (address, id) => {
+    transporter.sendMail({
+      from: "Articulatte <articulatteapp@gmail.com>",
+      to: address,
+      subject: "Room Invite – Articulatte",
+      html: `User <b>${user.nickname}<b> invited you to the room <b>${rooms[id].name}</b>: https://articulatte.herokuapp.com#${rooms[id].code}
+      <br><br><span style="color: gray;">Articulatte is a simple free web chat app. Learn more: https://github.com/powerpoint56/Articulatte</span>`
+    }, (err, info) => {
+      console.log("mail error", err, info);
+    });
   });
 });
