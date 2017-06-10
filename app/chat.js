@@ -289,15 +289,18 @@ class Room {
                 const emailForm = e.target.nextElementSibling.querySelector("form");
                 emailForm.classList.toggle("fade");
                 emailForm.focus();
+                jd.f("input", emailForm).value = localStorage.getItem("last-emailed") || "";
               }
             }
           }),
           jd.c("span", {style: "position: relative;"}, [
             jd.c("form", {class: "fade fadeable email", events: {"submit": e => {
               e.preventDefault();
-              socket.emit("email", jd.f("input", e.target).value, this.id);
+              const val = jd.f("input", e.target).value;
+              socket.emit("email", val, this.id);
               e.target.classList.toggle("fade");
               e.target.reset();
+              localStorage.getItem("last-emailed", val);
               return false;
             }}}, [
               jd.c("input", {type: "email", placeholder: "Email Address"}),
