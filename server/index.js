@@ -273,7 +273,7 @@ io.on("connection", socket => {
       from: "Articulatte <articulatteapp@gmail.com>",
       to: address,
       subject: "Room Invite – Articulatte",
-      html: `User <b>${user.nickname}<b> invited you to the room <b>${rooms[id].name}</b>: https://articulatte.herokuapp.com#${rooms[id].code}
+      html: `User <b>${user.nickname}</b> invited you to the room <b>${rooms[id].name}</b>: https://articulatte.herokuapp.com#${rooms[id].code}
       <br><br><span style="color: gray;">Articulatte is a simple free web chat app. Learn more: https://github.com/powerpoint56/Articulatte</span>`
     }, (err, info) => {
       console.log("mail error", err, info);
