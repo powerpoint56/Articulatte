@@ -300,7 +300,7 @@ class Room {
               socket.emit("email", val, this.id);
               e.target.classList.toggle("fade");
               e.target.reset();
-              localStorage.getItem("last-emailed", val);
+              localStorage.setItem("last-emailed", val);
               return false;
             }}}, [
               jd.c("input", {type: "email", placeholder: "Email Address"}),
