@@ -31,7 +31,7 @@ const transporter = nodemailer.createTransport({
     secure: true,
     auth: {
       user: "articulatteapp@gmail.com",
-      pass: fs.readFileSync("emailauth.txt", "utf-8", err => err)
+      pass: process.env["GMAIL_PASSWORD"]
     }
 });
 
