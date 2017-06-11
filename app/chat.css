@@ -134,12 +134,11 @@ a {
 }
 
 .f-input {
-  flex: 1 0 auto;
+  flex: 1 1;
   padding: 4px;
   border: 1px solid #ccc;
   background: white;
   min-height: 1em;
-  white-space: pre-wrap;
 }
 
 .f-reply {
@@ -150,8 +149,7 @@ a {
   font-size: 100%;
   margin: 8px;
   display: flex;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+  flex: 1 1;
 }
 
 .m-icon {
@@ -174,10 +172,6 @@ a {
   font-size: 13px;
   color: #929294;
   margin-left: 6px;
-}
-
-.m-text {
-  white-space: pre-wrap;
 }
 
 .update {
