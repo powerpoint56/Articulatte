@@ -270,6 +270,7 @@ io.on("connection", socket => {
   
   const sentEmails = [];
   
+  
   socket.on("email", (address, id) => {
     const data = [address, id];
     if (sentEmails.includes(data)) return;
