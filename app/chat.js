@@ -523,7 +523,7 @@ const Notify = (() => {
 })();
 
 function changeFavicon(src) { // https://gist.github.com/mathiasbynens/428626
-  let oldLink = jd.f("#dynamic-favicon");
+  let oldLink = jd.f("#dynamic-favicon", document.head);
   if (oldLink) {
     document.head.removeChild(oldLink);
   }

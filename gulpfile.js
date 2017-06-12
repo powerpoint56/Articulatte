@@ -16,7 +16,11 @@ const dest = "./dist";
 gulp.task("js", () => {
     gulp.src([`${src}/polyfills.js`, `${src}/jdom.js`, `${src}/chat.js`])
         .pipe(babel({presets: ["es2015"]}))
-        .pipe(uglify())
+        .pipe(uglify({
+            mangle: {
+                reserved: ["jd"]
+            }
+        }))
         .pipe(concat("build.js"))
         .pipe(gulp.dest(dest));
 });
