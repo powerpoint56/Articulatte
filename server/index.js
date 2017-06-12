@@ -268,7 +268,13 @@ io.on("connection", socket => {
     joinRoom(rooms[id]);
   });
   
+  const sentEmails = [];
+  
   socket.on("email", (address, id) => {
+    const data = [address, id];
+    if (sentEmails.includes(data)) return;
+    sentEmails.push(data);
+    
     transporter.sendMail({
       from: "Articulatte <articulatteapp@gmail.com>",
       to: address,
