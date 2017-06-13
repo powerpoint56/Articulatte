@@ -276,19 +276,23 @@ io.on("connection", socket => {
     
     const addresses = addressStr.split(", ");
     if (addresses.length > 5) return;
-    const data = {
-      id,
-      recipients: addresses
-    };
-    if (sentEmails.includes(data)) return;
-    sentEmails.push(data);
+    for (let i = 0; i < addresses.length; i++) {
+      const data = [id, addresses[i]];
+      
+      if (sentEmails.includes(data)) {
+        addresses.splice(i, 1);
+      } else {
+        sentEmails.push(data);
+      }
+    }
+    addressStr = addresses.join(", ");
     
     transporter.sendMail({
       from: "Articulatte <articulatteapp@gmail.com>",
       to: addressStr,
       subject: "Room Invite – Articulatte",
       html: `User <b>${user.nickname}</b> invited you to the room <b>${rooms[id].name}</b>: https://articulatte.herokuapp.com#${rooms[id].code}
-      <br><br><span style="color: gray;">Articulatte is a simple free web chat app. Learn more: https://github.com/powerpoint56/Articulatte</span>`
+      <br><br><span style="opacity: 0.5;">Articulatte is a simple free web chat app. Learn more: https://github.com/powerpoint56/Articulatte</span>`
     }, (err, info) => {
       console.log("mail error", err, info);
     });
