@@ -272,20 +272,25 @@ io.on("connection", socket => {
   
   
   socket.on("email", (addressStr, id) => {
-    if (!addressStr || !id) return;
+    if (addressStr === undefined || !addressStr.length || id === undefined) return;
     
-    const addresses = addressStr.split(", ");
+    const addresses = addressStr.split(",");
     if (addresses.length > 5) return;
-    for (let i = 0; i < addresses.length; i++) {
-      const data = [id, addresses[i]];
+    for (let i = 0; i < addresses.length; ++i) {
+      const recip = addresses[i];
+      const data = [id, recip];
       
-      if (sentEmails.includes(data)) {
-        addresses.splice(i, 1);
+      if (sentEmails.some(email => email[0] === id && email[1] === recip)) { // already sent to same address+id
+        addresses.splice(i, 1); // remove address
       } else {
-        sentEmails.push(data);
+        sentEmails.push(data); // store address in case of the above
       }
     }
-    addressStr = addresses.join(", ");
+    addressStr = addresses.join(",");
+    console.log(addressStr);
+    if (addressStr.length) {
+      return;
+    }
     
     transporter.sendMail({
       from: "Articulatte <articulatteapp@gmail.com>",
