@@ -303,7 +303,7 @@ class Room {
               localStorage.setItem("last-emailed", val);
               return false;
             }}}, [
-              jd.c("input", {type: "email", placeholder: "Email Address"}),
+              jd.c("input", {type: "email", multiple: true, placeholder: "Email Address"}),
               jd.c("button", {class: "fa fa-arrow-right"})
             ])
           ]),

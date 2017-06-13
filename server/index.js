@@ -271,14 +271,21 @@ io.on("connection", socket => {
   const sentEmails = [];
   
   
-  socket.on("email", (address, id) => {
-    const data = [address, id];
+  socket.on("email", (addressStr, id) => {
+    if (!addressStr || !id) return;
+    
+    const addresses = addressStr.split(", ");
+    if (addresses.length > 5) return;
+    const data = {
+      id,
+      recipients: addresses
+    };
     if (sentEmails.includes(data)) return;
     sentEmails.push(data);
     
     transporter.sendMail({
       from: "Articulatte <articulatteapp@gmail.com>",
-      to: address,
+      to: addressStr,
       subject: "Room Invite – Articulatte",
       html: `User <b>${user.nickname}</b> invited you to the room <b>${rooms[id].name}</b>: https://articulatte.herokuapp.com#${rooms[id].code}
       <br><br><span style="color: gray;">Articulatte is a simple free web chat app. Learn more: https://github.com/powerpoint56/Articulatte</span>`
