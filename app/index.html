@@ -1,11 +1,13 @@
 <!doctype html>
+<!-- Microdata markup added by Google Structured Data Markup Helper. -->
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <title>Articulatte</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="description">
+    <meta name="description" content="Articulatte is a free online chat app that is private, open-source, and beautiful.">
     <meta name="author" content="pointprojects">
+    <meta name="robots" content="index,follow">
     <base target="_blank" tabindex=-1>
     <link href="fav.ico" rel="icon" type="image/x-icon" id="dynamic-favicon">
     <script src="https://use.fontawesome.com/2bbb569205.js"></script>
@@ -44,11 +46,18 @@
         <input type="checkbox" id="mute-check" class="hide"></input>
         <label for="mute-check" class="fa fa-volume-up mute"></label>
         
-        <div class="about">
-          <p>powerpoint56</p>
-          <p><a href="https://github.com/powerpoint56">GitHub</a></p>
+        <div itemscope itemtype="http://schema.org/SoftwareApplication" class="about">
+          <h1 itemprop="name">Articulatte</h1>
+          <div class="github">
+            <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+              <p itemprop="name">powerpoint56</p>
+            </span>
+            <p><a href="https://github.com/powerpoint56">GitHub</a></p>
+          </div>
         </div>
+        
       </div>
+    </div>
 
     <!-- build:js -->
     <script src="jdom.js"></script>

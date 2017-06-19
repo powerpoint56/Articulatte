@@ -191,10 +191,16 @@ a {
 .about {
   margin-top: auto;
   display: flex;
-  justify-content: space-around;
+  text-align: center;
   padding: 4px;
   color: gray;
   order: 3;
+  flex-direction: column;
+}
+
+.github {
+  display: flex;
+  justify-content: space-around;
 }
 
 .about a {
