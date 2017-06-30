@@ -8,8 +8,11 @@ const nodeStatic = require("node-static");
 const shortid = require("shortid");
 const striptags = require("striptags");
 const nodemailer = require("nodemailer");
+const JsonDB = require("node-json-db");
 
 const animalia = require("./animalia.js");
+
+const db = new JsonDB("state", true);
 
 Set.prototype.toJSON = function toJSON() {
   return [...Set.prototype.values.call(this)];
@@ -101,7 +104,7 @@ Room.all = () => {
 
 const Home = Room.create("Home", {isPermanent: true, isHome: true});
 
-/*try {
+try {
   const data = db.getData("/rooms");
   for (let id in data) {
     const roomData = data[id];
@@ -117,7 +120,7 @@ const Home = Room.create("Home", {isPermanent: true, isHome: true});
   }
 } catch (err) {
 
-}*/
+}
 
 
 io.on("connection", socket => {
