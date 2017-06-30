@@ -3,7 +3,6 @@
 const isProduction = process.argv[2] === "prod";
 
 const http = require("http");
-const fs = require("fs");
 
 const nodeStatic = require("node-static");
 const shortid = require("shortid");
@@ -19,20 +18,20 @@ Set.prototype.toJSON = function toJSON() {
 let file = new nodeStatic.Server(isProduction ? "./dist" : "./app");
 
 let server = http.createServer((req, res) => {
-    req.on("end", () => {
-        file.serve(req, res);
-    }).resume();
+  req.on("end", () => {
+    file.serve(req, res);
+  }).resume();
 }).listen(process.env.PORT || 3000);
 
 const transporter = nodemailer.createTransport({
-    pool: true,
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: "articulatteapp@gmail.com",
-      pass: process.env["GMAIL_PASSWORD"]
-    }
+  pool: true,
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: "articulatteapp@gmail.com",
+    pass: process.env["GMAIL_PASSWORD"]
+  }
 });
 
 const io = require("socket.io")(server);
@@ -287,8 +286,7 @@ io.on("connection", socket => {
       }
     }
     addressStr = addresses.join(",");
-    console.log(addressStr);
-    if (addressStr.length) {
+    if (!addressStr.length) {
       return;
     }
     

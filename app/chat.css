@@ -12,15 +12,20 @@ button {
   background: none;
   border-radius: 0;
   border: 0;
-  outline: 0;
   margin: 0 4px;
   cursor: pointer;
   font-size: 80%;
   padding: 4px;
+  transition: all .3s;
+}
+
+button:focus {
+  outline: 0;
 }
 
 button:hover, button:active {
   background: #f6f6f8;
+  color: #626262;
 }
 
 input {
@@ -106,12 +111,17 @@ a {
   margin: auto;
   top: 0;
   bottom: 0;
+  padding-right: 26px;
 }
 
 .email button {
   right: 0;
   display: inline-block;
   position: absolute;
+}
+
+.email button {
+  background: none;
 }
 
 
