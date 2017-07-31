@@ -286,10 +286,10 @@ class Room {
             tabindex: 2,
             events: {
               click: e => {
-                const emailForm = e.target.nextElementSibling.querySelector("form");
+                const emailForm = jd.f("form", e.target.nextElementSibling);
                 emailForm.classList.toggle("fade");
-                emailForm.focus();
-                jd.f("input", emailForm).value = localStorage.getItem("last-emailed") || "";
+                const input = jd.f("input", emailForm);
+                input.value = localStorage.getItem("last-emailed") || "";
               }
             }
           }),
