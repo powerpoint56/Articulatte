@@ -86,8 +86,9 @@ class User {
     return jd.c("span", {_: this.displayName, style: {color: this.hsl}});
   }
 }
-User.create = (...args) => {
-  const user = new User(...args);
+User.create = (id, nickname) => {
+  if (users[id]) return users[id];
+  const user = new User(id, nickname);
   users[user.id] = user;
   return user;
 };
@@ -162,12 +163,26 @@ const RoomList = new UpdatingList((li, room) => {
 }, "Rooms");
 
 
+function createMember(id, nickname) {
+  if (users[id]) return users[id];
+  const user = User.create(id, nickname);
+  user.onlineIndicator = jd.c("div", {class: "message"}, [
+    user.createIcon(),
+    jd.c("div", {class: "m-content"}, [
+      jd.c("div", {class: "m-header"}, [
+        user.createLabel()
+      ])
+    ])
+  ], jd.f(".names", ".people"));
+  return user;
+}
+
 socket.on("join", (roomId, roomCode, arr) => {
   const room = rooms[roomId];
 
   let members = [];
   for (let i = 0; i < arr.length; i += 2) {
-    User.create(arr[i], arr[i+1]);
+    createMember(arr[i], arr[i+1]);
     members.push(arr[i+1]);
   }
 
@@ -192,37 +207,40 @@ socket.on("join", (roomId, roomCode, arr) => {
 socket.on("tell", (roomId, content, userId) => {
   const user = users[userId];
   rooms[roomId].addMessage(content, user);
-  if (user.typingIndicator) {
-    user.typingIndicator.classList.add("hide");
+  if (user[roomId].typingIndicator) {
+    user[roomId].typingIndicator.classList.add("hide");
   }
 });
 
 socket.on("typing", (roomId, userId) => {
   const user = users[userId];
-  if (!user.typingIndicator) {
-    user.typingIndicator = user.createIcon();
-    rooms[roomId].typing.appendChild(user.typingIndicator);
+  if (!user[roomId]) {
+    user[roomId] = {
+      typingIndicator: user.createIcon()
+    };
+    rooms[roomId].typing.appendChild(user[roomId].typingIndicator);
   } else {
-    user.typingIndicator.classList.remove("hide");
+    user[roomId].typingIndicator.classList.remove("hide");
   }
 });
 
 socket.on("not typing", (roomId, userId) => {
   const user = users[userId];
-  if (user.typingIndicator) {
-    user.typingIndicator.classList.add("hide");
+  if (user[roomId].typingIndicator) {
+    user[roomId].typingIndicator.classList.add("hide");
   }
 });
 
 socket.on("+member", (roomId, userId, nickname) => {
-  User.create(userId, nickname);
-  rooms[roomId].addUpdate(`${nickname} has joined the room`, users[userId]);
+  const user = createMember(userId, nickname);
+  rooms[roomId].addUpdate(`${nickname} has joined the room`, user);
 });
 
 socket.on("-member", (roomId, userId) => {
   const user = users[userId], room = rooms[roomId];
   room.addUpdate(`${user.nickname} has left the room`, user);
-  room.typing.removeChild(user.typingIndicator);
+  room.typing.removeChild(user[roomId].typingIndicator);
+  user.onlineIndicator.parentNode.removeChild(user.onlineIndicator);
 });
 
 socket.on("left", roomId => {
