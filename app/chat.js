@@ -99,7 +99,7 @@ const socket = io();
 
 socket.on("ban", ban);
 
-const nicknameForm = jd.f(".nickname", ".main");
+let nicknameForm = jd.f(".nickname", ".main");
 
 nicknameForm.addEventListener("submit", e => {
   e.preventDefault();
@@ -125,7 +125,8 @@ socket.on("nickInvalid", (name, reason) => {
 });
 
 socket.on("login", (id, nickname) => {
-  jd.f(".main").removeChild(jd.f(".nickname", ".main"));
+  jd.f(".main").removeChild(nicknameForm);
+  nicknameForm = null;
 
   myId = id;
   User.create(id, nickname);
@@ -163,7 +164,7 @@ const RoomList = new UpdatingList((li, room) => {
 }, "Rooms");
 
 
-function createMember(id, nickname) {
+function createMember(id, nickname, isActive=true) {
   if (users[id]) return users[id];
   const user = User.create(id, nickname);
   user.onlineIndicator = jd.c("div", {class: "message"}, [
@@ -174,6 +175,9 @@ function createMember(id, nickname) {
       ])
     ])
   ], jd.f(".names", ".people"));
+  if (!isActive) {
+    user.onlineIndicator.classList.add("inactive");
+  }
   return user;
 }
 
@@ -181,8 +185,8 @@ socket.on("join", (roomId, roomCode, arr) => {
   const room = rooms[roomId];
 
   let members = [];
-  for (let i = 0; i < arr.length; i += 2) {
-    createMember(arr[i], arr[i+1]);
+  for (let i = 0; i < arr.length; i += 3) {
+    createMember(arr[i], arr[i+1], arr[i+2]);
     members.push(arr[i+1]);
   }
 
@@ -236,15 +240,30 @@ socket.on("+member", (roomId, userId, nickname) => {
   rooms[roomId].addUpdate(`${nickname} has joined the room`, user);
 });
 
-socket.on("-member", (roomId, userId) => {
+socket.on("-member", (roomId, userId, isPermanent) => {
   const user = users[userId], room = rooms[roomId];
   room.addUpdate(`${user.nickname} has left the room`, user);
-  room.typing.removeChild(user[roomId].typingIndicator);
-  user.onlineIndicator.parentNode.removeChild(user.onlineIndicator);
+  if (user[roomId]) {
+    room.typing.removeChild(user[roomId].typingIndicator);
+  }
+  
+  if (isPermanent) {
+    user.onlineIndicator.parentNode.removeChild(user.onlineIndicator);
+    delete users[userId];
+  }
 });
 
 socket.on("left", roomId => {
   rooms[roomId].leave();
+});
+
+socket.on("active", (userId, isActive) => {
+  const user = users[userId];
+  if (isActive) {
+    user.onlineIndicator.classList.remove("inactive");
+  } else {
+    user.onlineIndicator.classList.add("inactive");
+  }
 });
 
 
@@ -362,9 +381,10 @@ class Room {
         }
         if (this.typeTimeoutId === undefined) {
           socket.emit("typing", this.id);
+        } else {
+          clearTimeout(this.typeTimeoutId);
         }
         
-        clearTimeout(this.typeTimeoutId);
         this.typeTimeoutId = setTimeout(() => {
           socket.emit("not typing", this.id);
           this.typeTimeoutId = undefined;
@@ -377,11 +397,17 @@ class Room {
     this.typing = jd.f(".typing", this.el);
   }
   leave() {
+    console.log(Object.keys(this));
     jd.f(".windows").removeChild(this.el);
     delete this.el;
     delete this.field;
     delete this.input;
     delete this.feed;
+    delete this.typing;
+    delete this.lastMessage;
+    delete this.lastContent;
+    delete this.lastTime;
+    delete this.lastSenderId;
   }
 
   addMessage(text, sender) {
@@ -501,17 +527,24 @@ socket.on("roomInvalid", (name, reason) => {
 });
 
 
-
 const Notify = (() => {
   let tabActive = true;
+  let offlineTimeoutId;
   window.addEventListener("focus", () => {
     tabActive = true;
     changeFavicon("fav.ico");
+    if (offlineTimeoutId !== undefined) {
+      clearTimeout(offlineTimeoutId);
+      socket.emit("active", true);
+    }
   });
   window.addEventListener("blur", () => {
     tabActive = false;
+    offlineTimeoutId = setInterval(() => {
+      socket.emit("active", false);
+    }, 10000);
   });
-
+  
   const context = AudioContext ? new AudioContext() : null;
   
   function beep() {

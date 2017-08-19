@@ -8,10 +8,8 @@ window.jd = ((window, document) => {
       if (typeof parent === "string") {
         parent = find(parent);
       }
-      return parent.querySelector(selector);
-    } else {
-      return cache[selector] || (cache[selector] = document.querySelector(selector));
     }
+    return (parent || document).querySelector(selector);
   }
 
   function create(tag, attributes, children, parent) {

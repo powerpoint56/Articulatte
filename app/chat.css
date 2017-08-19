@@ -59,6 +59,12 @@ a {
   opacity: 0;
 }
 
+.inactive {
+  opacity: .5;
+  filter: grayscale(100%);
+  transition: .3s opacity, .3s filter;
+}
+
 
 .main {
   flex-flow: row;
@@ -112,6 +118,10 @@ a {
   top: 0;
   bottom: 0;
   padding-right: 26px;
+}
+
+.email.fade * {
+  display: none;
 }
 
 .email button {

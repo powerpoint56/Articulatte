@@ -44,6 +44,7 @@ class User {
   constructor() {
     this.id = User.id++;
     this.roomIds = new Set();
+    this.isActive = true;
   }
 }
 User.id = 0;
@@ -151,6 +152,7 @@ io.on("connection", socket => {
     room.memberIds.forEach(id => {
       reply.push(id);
       reply.push(users[id].nickname);
+      reply.push(users[id].isActive);
 
       users[id].socket.emit("+member", room.id, user.id, user.nickname);
     });
@@ -209,6 +211,13 @@ io.on("connection", socket => {
   socket.on("not typing", roomId => {
     socket.to(roomId).emit("not typing", roomId, user.id);
   });
+  
+  socket.on("active", isActive => {
+    user.isActive = isActive;
+    user.roomIds.forEach(id => {
+      socket.to(id).broadcast.emit("active", user.id, isActive);
+    });
+  });
 
   socket.on("leave", roomId => {
     socket.emit("left", roomId);
@@ -217,13 +226,13 @@ io.on("connection", socket => {
 
   socket.on("disconnect", () => {
     user.roomIds.forEach(id => {
-      leaveRoom(rooms[id]);
+      leaveRoom(rooms[id], true);
     });
 
     delete users[user.id];
   });
 
-  function leaveRoom(room) {
+  function leaveRoom(room, isPermanent=false) {
     if (!room || !user.roomIds.has(room.id)) return;
 
     room.memberIds.delete(user.id);
@@ -235,7 +244,7 @@ io.on("connection", socket => {
 
     socket.leave(room.id);
 
-    socket.to(room.id).emit("-member", room.id, user.id);
+    socket.to(room.id).emit("-member", room.id, user.id, isPermanent);
   }
 
   function deleteRoom(room) {
