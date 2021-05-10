@@ -14,7 +14,7 @@
     "mongoose": "^4.10.4",
     "node-json-db": "^0.7.3",
     "node-static": "^0.7.9",
-    "nodemailer": "^4.0.1",
+    "nodemailer": ">=6.4.16",
     "shortid": "^2.2.6",
     "socket.io": "^1.7.3",
     "striptags": "^3.0.1"
